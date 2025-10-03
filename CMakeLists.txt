@@ -6,8 +6,7 @@ include(DownloadUserver)
 
 find_package(
     userver
-    COMPONENTS core #
-               postgresql
+    COMPONENTS core # postgresql
     QUIET
 )
 if(NOT userver_FOUND)
@@ -22,15 +21,15 @@ include_directories(src)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
-    src/greeting.cpp #
-    src/hello.cpp #
-    src/hello_postgres.cpp
-    src/user_type.cpp
+        src/orders_handler.cpp
+        src/couriers_handler.cpp
+        src/completed_orders_handler.cpp
+        src/get_order_handler.cpp
+        src/get_courier_handler.cpp
 )
 target_link_libraries(
     ${PROJECT_NAME}_objs
-    PUBLIC userver::core #
-           userver::postgresql
+    PUBLIC userver::core # userver::postgresql
 )
 
 
@@ -39,16 +38,14 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 
 # Unit Tests
-add_executable(${PROJECT_NAME}_unittest 
-                    src/greeting_test.cpp
-                    src/user_type_test.cpp)
-target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
-add_google_tests(${PROJECT_NAME}_unittest)
+# add_executable(${PROJECT_NAME}_unittest)
+# target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
+# add_google_tests(${PROJECT_NAME}_unittest)
 
 # Benchmarks
-add_executable(${PROJECT_NAME}_benchmark src/greeting_benchmark.cpp)
-target_link_libraries(${PROJECT_NAME}_benchmark PRIVATE ${PROJECT_NAME}_objs userver::ubench)
-add_google_benchmark_tests(${PROJECT_NAME}_benchmark)
+# add_executable(${PROJECT_NAME}_benchmark)
+# target_link_libraries(${PROJECT_NAME}_benchmark PRIVATE ${PROJECT_NAME}_objs userver::ubench)
+# add_google_benchmark_tests(${PROJECT_NAME}_benchmark)
 
 # Functional testing
 userver_testsuite_add_simple()
