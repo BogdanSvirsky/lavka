@@ -223,6 +223,7 @@ components:
         - regions
         - weight
       type: object
+      additionalProperties: false
       properties:
         weight:
           type: number
@@ -237,15 +238,18 @@ components:
         cost:
           type: integer
           format: int32
+
     CreateOrderRequest:
       required:
         - orders
       type: object
+      additionalProperties: false
       properties:
         orders:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrderDto'
+
     OrderDto:
       required:
         - cost
@@ -254,6 +258,7 @@ components:
         - regions
         - weight
       type: object
+      additionalProperties: false
       properties:
         order_id:
           type: integer
@@ -279,6 +284,7 @@ components:
         - group_order_id
         - orders
       type: object
+      additionalProperties: false
       properties:
         group_order_id:
           type: integer
@@ -291,12 +297,14 @@ components:
     
     BadRequestResponse:
       type: object
+      additionalProperties: false
     CompleteOrder:
       required:
         - complete_time
         - courier_id
         - order_id
       type: object
+      additionalProperties: false
       properties:
         courier_id:
           type: integer
@@ -307,21 +315,25 @@ components:
         complete_time:
           type: string
           format: date-time
+
     CompleteOrderRequestDto:
       required:
         - complete_info
       type: object
+      additionalProperties: false
       properties:
         complete_info:
           type: array
           items:
             $ref: '#/components/schemas/CompleteOrder'
+
     CreateCourierDto:
       required:
         - courier_type
         - regions
         - working_hours
       type: object
+      additionalProperties: false
       properties:
         courier_type:
           type: string
@@ -338,15 +350,18 @@ components:
           type: array
           items:
             type: string
+
     CreateCourierRequest:
       required:
         - couriers
       type: object
+      additionalProperties: false
       properties:
         couriers:
           type: array
           items:
             $ref: '#/components/schemas/CreateCourierDto'
+
     CourierDto:
       required:
         - courier_id
@@ -354,6 +369,7 @@ components:
         - regions
         - working_hours
       type: object
+      additionalProperties: false
       properties:
         courier_id:
           type: integer
@@ -373,23 +389,29 @@ components:
           type: array
           items:
             type: string
+
     CreateCouriersResponse:
       required:
         - couriers
       type: object
+      additionalProperties: false
       properties:
         couriers:
           type: array
           items:
             $ref: '#/components/schemas/CourierDto'
+
     NotFoundResponse:
       type: object
+      additionalProperties: false
+
     GetCouriersResponse:
       required:
         - couriers
         - limit
         - offset
       type: object
+      additionalProperties: false
       properties:
         couriers:
           type: array

@@ -7,6 +7,7 @@ include(DownloadUserver)
 find_package(
     userver
     COMPONENTS core # postgresql
+        chaotic #
     QUIET
 )
 if(NOT userver_FOUND)
@@ -30,6 +31,7 @@ add_library(
 target_link_libraries(
     ${PROJECT_NAME}_objs
     PUBLIC userver::core # userver::postgresql
+        userver::chaotic
 )
 
 
@@ -49,6 +51,20 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 
 # Functional testing
 userver_testsuite_add_simple()
+
+# Chaotic
+file(GLOB_RECURSE SCHEMAS ${CMAKE_CURRENT_SOURCE_DIR}/schemas/*.yaml)
+userver_target_generate_chaotic(
+    ${PROJECT_NAME}-chgen
+    # Generate serializers for responses
+    GENERATE_SERIALIZERS
+    # Map '/components/schemas/*' JSONSchema types to C++ types in 'samples::STEM' namespace
+    LAYOUT "/components/schemas/([^/]*)/=chaotic::{stem}::{0}"
+    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/src
+    SCHEMAS ${SCHEMAS}
+    RELATIVE_TO ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(${PROJECT_NAME}_objs PUBLIC ${PROJECT_NAME}-chgen)
 
 # Install
 include(GNUInstallDirs)

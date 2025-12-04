@@ -28,7 +28,7 @@
             ],
             "settings": {
                 "cmake.automaticReconfigure": false,
-                "cmake.configureOnEdit":  false,
+                "cmake.configureOnEdit": false,
                 "cmake.configureOnOpen": false,
                 "cmake.copyCompileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
                 "clangd.path": "/usr/bin/clangd",
@@ -39,7 +39,8 @@
                     "--completion-style=detailed",
                     "--header-insertion=never"
                 ]
-            }
+            },
+            "extensions.verifySignature": false
         }
     },
     "onCreateCommand": "sudo git config --global --add safe.directory /home/user/lavka",
