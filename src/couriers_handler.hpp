@@ -2,6 +2,10 @@
 
 namespace lavka {
 class CouriersHandler : public userver::server::handlers::HttpHandlerBase {
+
+    std::string GetCouriers(userver::server::http::HttpRequest& request) const;
+    std::string PostCouriers(userver::server::http::HttpRequest& request) const;
+
    public:
     static constexpr std::string_view kName = "couriers-handler";
 

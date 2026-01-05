@@ -15,33 +15,40 @@ std::string OrdersHandler::HandleRequest(http::HttpRequest& request,
         json::ValueBuilder{chaotic::openapi::BadRequestResponse()}
             .ExtractValue();
 
-    switch (request.GetMethod()) {
-        case http::HttpMethod::kGet: {
+    switch (request.GetMethod()) {      // TODO: split into separated methods
+        case http::HttpMethod::kGet: {  // TODO: add a limit & offset
             chaotic::openapi::OrderDto orderDto{
                 0, 0, 0, {"08:00-09:00"}, 0, std::nullopt};
-            std::vector<chaotic::openapi::OrderDto> resultArr(1);
+            std::vector<chaotic::openapi::OrderDto> resultArr;
             resultArr.push_back(orderDto);
             response_json = json::ValueBuilder{resultArr}.ExtractValue();
             break;
         }
         case http::HttpMethod::kPost: {
-            request.GetHttpResponse().SetContentType(
-                userver::http::content_type::kApplicationJson);
-            json::Value request_json = json::FromString(request.RequestBody());
+            chaotic::openapi::CreateOrderRequest request_dto;
+            try {
+                request_dto = json::FromString(request.RequestBody())
+                                  .As<chaotic::openapi::CreateOrderRequest>();
+            } catch (json::Exception) {
+                request.GetHttpResponse().SetStatus(
+                    http::HttpStatus::kBadRequest);
+                return json::ToString(response_json);
+            }
 
-            auto request_dom =
-                request_json.As<chaotic::openapi::CreateOrderRequest>();
             unsigned int id = 0;
             std::vector<chaotic::openapi::OrderDto> created_orders;
-            for (auto order : request_dom.orders) {
+            for (auto order : request_dto.orders) {
                 created_orders.push_back({id++, order.weight, order.regions,
                                           order.delivery_hours, order.cost});
             }
+
+            request.GetHttpResponse().SetContentType(
+                userver::http::content_type::kApplicationJson);
             response_json = json::ValueBuilder{created_orders}.ExtractValue();
             break;
         }
         default:
-            request.GetHttpResponse().SetStatus(http::HttpStatus::BadRequest);
+            request.GetHttpResponse().SetStatus(http::HttpStatus::kBadRequest);
             break;
     }
 
