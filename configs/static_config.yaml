@@ -22,6 +22,15 @@ components_manager:
                     file_path: '@stderr'
                     level: $logger-level
                     overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
+
+        testsuite-support:
+            cache-update-execution: concurrent
+
+
+        lavka-db:
+            dbconnection: 'user=lavkauser password=lavkapass host=host.docker.internal port=5432 dbname=lavka'
+            blocking_task_processor: fs-task-processor
+            dns_resolver: async
     
         orders-handler:
             path: /orders

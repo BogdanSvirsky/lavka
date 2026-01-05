@@ -6,8 +6,7 @@ include(DownloadUserver)
 
 find_package(
     userver
-    COMPONENTS core # postgresql
-        chaotic #
+    COMPONENTS core postgresql chaotic 
     QUIET
 )
 if(NOT userver_FOUND)
@@ -30,7 +29,8 @@ add_library(
 )
 target_link_libraries(
     ${PROJECT_NAME}_objs
-    PUBLIC userver::core # userver::postgresql
+    PUBLIC userver::core 
+        userver::postgresql
         userver::chaotic
 )
 

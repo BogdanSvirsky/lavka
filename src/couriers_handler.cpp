@@ -1,4 +1,7 @@
 #include "couriers_handler.hpp"
+#include <userver/components/component_context.hpp>
+#include <userver/storages/postgres/component.hpp>
+
 #include "schemas/openapi.hpp"
 
 using namespace userver::server;
@@ -6,6 +9,14 @@ using namespace userver::formats;
 using namespace chaotic::openapi;
 
 namespace lavka {
+CouriersHandler::CouriersHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerBase(config, context),
+      pg_cluster_(
+          context.FindComponent<userver::components::Postgres>("lavka-db")
+              .GetCluster()) {}
+
 std::string CouriersHandler::HandleRequest(http::HttpRequest& request,
                                            request::RequestContext&) const {
     json::Value response =
