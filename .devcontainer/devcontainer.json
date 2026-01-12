@@ -22,7 +22,11 @@
                 "ms-vscode.cmake-tools",
                 "ms-vscode.makefile-tools",
                 "vadimcn.vscode-lldb",
-                "ms-azuretools.vscode-docker"
+                "ms-azuretools.vscode-docker",
+                "xaver.clang-format",
+                "ms-python.vscode-pylance",
+                "ms-python.python",
+                "ms-python.autopep8"
             ],
             "settings": {
                 "cmake.automaticReconfigure": false,

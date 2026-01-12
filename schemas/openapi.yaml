@@ -336,11 +336,7 @@ components:
       additionalProperties: false
       properties:
         courier_type:
-          type: string
-          enum:
-            - FOOT
-            - BIKE
-            - AUTO
+          $ref: '#/components/schemas/CourierType'
         regions:
           type: array
           items:
@@ -375,11 +371,7 @@ components:
           type: integer
           format: int64
         courier_type:
-          type: string
-          enum:
-            - FOOT
-            - BIKE
-            - AUTO
+          $ref: '#/components/schemas/CourierType'
         regions:
           type: array
           items:
@@ -423,3 +415,10 @@ components:
         offset:
           type: integer
           format: int32
+    
+    CourierType:
+      type: string
+      enum:
+        - FOOT
+        - BIKE
+        - AUTO

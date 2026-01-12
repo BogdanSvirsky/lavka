@@ -26,6 +26,7 @@ add_library(
         src/completed_orders_handler.cpp
         src/get_order_handler.cpp
         src/get_courier_handler.cpp
+        src/utils.cpp
 )
 target_link_libraries(
     ${PROJECT_NAME}_objs

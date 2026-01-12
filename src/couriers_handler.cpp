@@ -1,8 +1,9 @@
 #include "couriers_handler.hpp"
-#include <userver/components/component_context.hpp>
-#include <userver/storages/postgres/component.hpp>
+#include <userver/server/handlers/exceptions.hpp>
+#include "cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
 
 #include "schemas/openapi.hpp"
+#include "utils.hpp"
 
 using namespace userver::server;
 using namespace userver::formats;
@@ -13,14 +14,12 @@ CouriersHandler::CouriersHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
     : HttpHandlerBase(config, context),
-      pg_cluster_(
-          context.FindComponent<userver::components::Postgres>("lavka-db")
-              .GetCluster()) {}
+      pg_cluster_(lavka::utils::GetDBCluster(context)) {}
 
 std::string CouriersHandler::HandleRequest(http::HttpRequest& request,
                                            request::RequestContext&) const {
-    json::Value response =
-        json::ValueBuilder{BadRequestResponse{}}.ExtractValue();
+    request.GetHttpResponse().SetContentType(
+        userver::http::content_type::kApplicationJson);
 
     switch (request.GetMethod()) {
         case http::HttpMethod::kGet:
@@ -28,66 +27,61 @@ std::string CouriersHandler::HandleRequest(http::HttpRequest& request,
         case http::HttpMethod::kPost:
             return PostCouriers(request);
         default:
-            request.GetHttpResponse().SetStatus(http::HttpStatus::BadRequest);
-            return json::ToString(response);
+            throw handlers::ClientError();
     };
 }
 
 std::string CouriersHandler::GetCouriers(
     userver::server::http::HttpRequest& request) const {
-    request.GetHttpResponse().SetContentType(
-        userver::http::content_type::kApplicationJson);
-    json::Value response =
-        json::ValueBuilder{BadRequestResponse{}}.ExtractValue();
-    std::string limitStr = request.GetArg("limit"),
-                offsetStr = request.GetArg("offset");
+    auto [limit, offset] = lavka::utils::ExtractPagination(request);
 
-    int limit = limitStr.empty() ? 1 : std::stoi(limitStr),
-        offset = offsetStr.empty() ? 0 : std::stoi(offsetStr);
+    LOG_DEBUG() << limit << " " << offset;
 
-    if (limit < 1 && offset < 0) {
-        request.GetHttpResponse().SetStatus(http::HttpStatus::BadRequest);
-    } else {
-        response = json::ValueBuilder{GetCouriersResponse{
-                                          {{0,
-                                            CourierDto::Courier_Type::kBike,
-                                            {54},
-                                            {"09:00-14:00"}}},
-                                          limit,
-                                          offset}}
-                       .ExtractValue();
+    auto res = pg_cluster_->Execute(
+        userver::storages::postgres::ClusterHostType::kSlave,
+        "SELECT id, type, regions, working_hours FROM lavka.couriers\n"
+        "ORDER BY id LIMIT $1 OFFSET $2;",
+        limit, offset);
+
+    GetCouriersResponse response_dto{.limit = limit, .offset = offset};
+    for (CourierDto courier :
+         res.AsSetOf<CourierDto>(userver::storages::postgres::kRowTag)) {
+        response_dto.couriers.push_back(courier);
     }
 
+    json::Value response = json::ValueBuilder{response_dto}.ExtractValue();
     return json::ToString(response);
 }
 
 std::string CouriersHandler::PostCouriers(http::HttpRequest& request) const {
-    json::Value response =
-        json::ValueBuilder{BadRequestResponse{}}.ExtractValue();
-
-    request.GetHttpResponse().SetContentType(
-        userver::http::content_type::kApplicationJson);
-
     CreateCourierRequest request_dto;
 
     try {
         request_dto =
             json::FromString(request.RequestBody()).As<CreateCourierRequest>();
-    } catch (json::Exception&) {
-        request.GetHttpResponse().SetStatus(http::HttpStatus::BadRequest);
-        return json::ToString(response);
+    } catch (json::Exception& e) {
+        LOG_INFO() << "Catched exception " << e.what()
+                   << " with message: " << e.GetMessage();
+        throw handlers::ClientError();
     }
 
     CreateCouriersResponse response_dto;
-    int id = 0;
 
-    for (CreateCourierDto& courier : request_dto.couriers) {
-        response_dto.couriers.push_back(CourierDto{
-            id++, CourierDto::kCourier_TypeValues[(int)courier.courier_type],
-            courier.regions, courier.working_hours});
+    for (CreateCourierDto courier : request_dto.couriers) {
+        auto res = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            "INSERT INTO lavka.couriers (type, regions, working_hours) "
+            "VALUES ($1, $2, $3)"
+            "RETURNING id, type, regions, working_hours",
+            courier.courier_type, courier.regions, courier.working_hours);
+
+        CourierDto created_courier =
+            res.AsSingleRow<CourierDto>(userver::storages::postgres::kRowTag);
+
+        response_dto.couriers.push_back(created_courier);
     }
 
-    response = json::ValueBuilder{response_dto}.ExtractValue();
+    json::Value response = json::ValueBuilder{response_dto}.ExtractValue();
     return json::ToString(response);
 }
 }  // namespace lavka

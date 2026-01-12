@@ -1,12 +1,17 @@
 #include <userver/server/handlers/http_handler_base.hpp>
+#include <userver/storages/postgres/cluster.hpp>
 
 namespace lavka {
 class CompletedOrdersHandler
     : public userver::server::handlers::HttpHandlerBase {
+    userver::storages::postgres::ClusterPtr pg_cluster_;
+
    public:
     static constexpr std::string_view kName = "completed-orders-handler";
 
-    using userver::server::handlers::HttpHandlerBase::HttpHandlerBase;
+    CompletedOrdersHandler(
+        const userver::components::ComponentConfig& config,
+        const userver::components::ComponentContext& context);
 
     std::string HandleRequest(
         userver::server::http::HttpRequest& request,

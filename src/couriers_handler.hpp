@@ -2,6 +2,7 @@
 #include <userver/storages/postgres/cluster.hpp>
 
 namespace lavka {
+
 class CouriersHandler : public userver::server::handlers::HttpHandlerBase {
     std::string GetCouriers(userver::server::http::HttpRequest& request) const;
     std::string PostCouriers(userver::server::http::HttpRequest& request) const;
