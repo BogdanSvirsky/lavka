@@ -23,9 +23,7 @@ components_manager:
                     level: $logger-level
                     overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
 
-        testsuite-support:
-            cache-update-execution: concurrent
-
+        testsuite-support: {}
 
         lavka-db:
             dbconnection: 'user=lavkauser password=lavkapass host=host.docker.internal port=5432 dbname=lavka'
@@ -35,19 +33,24 @@ components_manager:
         orders-handler:
             path: /orders
             method: GET,POST
+            max_requests_per_second: 10
 
         get-order-handler:
             path: /orders/{order_id}
             method: GET
+            max_requests_per_second: 10
 
         completed-orders-handler:
             path: /orders/complete
             method: POST
+            max_requests_per_second: 10
         
         couriers-handler:
             path: /couriers
             method: GET,POST
+            max_requests_per_second: 10
 
         get-courier-handler:
             path: /couriers/{courier_id}
             method: GET
+            max_requests_per_second: 10
