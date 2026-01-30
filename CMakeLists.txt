@@ -21,6 +21,7 @@ include_directories(src)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
+        src/common_handler.cpp
         src/orders_handler.cpp
         src/couriers_handler.cpp
         src/completed_orders_handler.cpp

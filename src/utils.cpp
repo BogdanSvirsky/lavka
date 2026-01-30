@@ -1,8 +1,6 @@
 #include "utils.hpp"
-#include <userver/components/component_context.hpp>
 #include <userver/logging/log.hpp>
 #include <userver/server/handlers/exceptions.hpp>
-#include <userver/storages/postgres/component.hpp>
 
 namespace lavka::utils {
 std::pair<int, int> ExtractPagination(
@@ -26,11 +24,5 @@ std::pair<int, int> ExtractPagination(
 
     if (limit < 1 || offset < 0) throw userver::server::handlers::ClientError();
     return {limit, offset};
-}
-
-userver::storages::postgres::ClusterPtr GetDBCluster(
-    const userver::components::ComponentContext& context) {
-    return context.FindComponent<userver::components::Postgres>("lavka-db")
-        .GetCluster();
 }
 }  // namespace lavka::utils
