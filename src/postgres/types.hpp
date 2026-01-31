@@ -3,9 +3,10 @@
 #include <string>
 #include <userver/storages/postgres/io/chrono.hpp>
 #include <vector>
+
 #include "schemas/openapi.hpp"
 
-namespace lavka::db {
+namespace lavka::postgres {
 struct Order {
     std::int64_t id{};
     float weight{};
@@ -25,4 +26,4 @@ struct Order {
         return result;
     }
 };
-}  // namespace lavka::db
+}  // namespace lavka::postgres

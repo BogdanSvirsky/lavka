@@ -1,7 +1,7 @@
 #include "get_order_handler.hpp"
-#include "db/types.hpp"
+
+#include "postgres/types.hpp"
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
@@ -29,8 +29,8 @@ json::Value GetOrderHandler::HandleRequestJsonThrow(
 
     if (res.IsEmpty()) throw ClientError{};
 
-    chaotic::openapi::OrderDto order =
-        res.AsSingleRow<lavka::db::Order>(userver::storages::postgres::kRowTag);
+    chaotic::openapi::OrderDto order = res.AsSingleRow<lavka::postgres::Order>(
+        userver::storages::postgres::kRowTag);
 
     return json::ValueBuilder{order}.ExtractValue();
 }

@@ -1,13 +1,14 @@
 #include "orders_handler.hpp"
-#include "schemas/openapi.hpp"
 
 #include <userver/components/component_context.hpp>
 #include <userver/formats/json.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 #include <userver/server/http/http_response.hpp>
 #include <userver/storages/postgres/component.hpp>
-#include "cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
-#include "db/types.hpp"
+
+#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
+#include "postgres/types.hpp"
+#include "schemas/openapi.hpp"
 #include "utils.hpp"
 
 using namespace userver::server;
@@ -40,10 +41,10 @@ json::Value OrdersHandler::GetOrders(
                      "lavka.orders\n"
                      "ORDER BY id LIMIT $1 OFFSET $2;",
                      limit, offset)
-            .AsSetOf<db::Order>(userver::storages::postgres::kRowTag);
+            .AsSetOf<postgres::Order>(userver::storages::postgres::kRowTag);
 
     std::vector<chaotic::openapi::OrderDto> resultArr;
-    for (db::Order order : res) {
+    for (postgres::Order order : res) {
         resultArr.push_back(order);
     }
 
@@ -61,7 +62,7 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
     std::vector<chaotic::openapi::OrderDto> result;
 
     for (chaotic::openapi::CreateOrderDto order : request_dto.orders) {
-        db::Order created_order =
+        postgres::Order created_order =
             GetPg()
                 .Execute(
                     userver::storages::postgres::ClusterHostType::kMaster,
@@ -71,7 +72,8 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
                     "delivery_hours, cost, completed_time",
                     order.weight, order.regions, order.delivery_hours,
                     order.cost)
-                .AsSingleRow<db::Order>(userver::storages::postgres::kRowTag);
+                .AsSingleRow<postgres::Order>(
+                    userver::storages::postgres::kRowTag);
         result.push_back(created_order);
     }
     return json::ValueBuilder{result}.ExtractValue();

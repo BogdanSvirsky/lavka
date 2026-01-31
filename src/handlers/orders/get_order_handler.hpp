@@ -1,12 +1,13 @@
 #include <userver/server/handlers/http_handler_base.hpp>
 #include <userver/storages/postgres/cluster.hpp>
-#include "common_handler.hpp"
+
+#include "handlers/common_handler.hpp"
 
 namespace lavka {
-class GetCourierHandler : public lavka::CommonHandler {
+class GetOrderHandler : public lavka::CommonHandler {
    public:
-    static constexpr std::string_view kName = "get-courier-handler";
-    static constexpr std::string_view kCourierIdPathArg = "courier_id";
+    static constexpr std::string_view kName = "get-order-handler";
+    static constexpr std::string_view kOrderIdPathArg = "order_id";
 
     using CommonHandler::CommonHandler;
 

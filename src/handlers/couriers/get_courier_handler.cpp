@@ -1,6 +1,8 @@
 #include "get_courier_handler.hpp"
+
 #include <userver/server/http/http_error.hpp>
-#include "cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
+
+#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;

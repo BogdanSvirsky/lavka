@@ -2,13 +2,13 @@
 #include <userver/components/minimal_server_component_list.hpp>
 #include <userver/storages/postgres/component.hpp>
 #include <userver/testsuite/testsuite_support.hpp>
-
 #include <userver/utils/daemon_run.hpp>
-#include "completed_orders_handler.hpp"
-#include "couriers_handler.hpp"
-#include "get_courier_handler.hpp"
-#include "get_order_handler.hpp"
-#include "orders_handler.hpp"
+
+#include "handlers/couriers/couriers_handler.hpp"
+#include "handlers/couriers/get_courier_handler.hpp"
+#include "handlers/orders/completed_orders_handler.hpp"
+#include "handlers/orders/get_order_handler.hpp"
+#include "handlers/orders/orders_handler.hpp"
 
 int main(int argc, char* argv[]) {
     auto component_list = userver::components::MinimalServerComponentList()

@@ -1,7 +1,9 @@
-#include <completed_orders_handler.hpp>
+#include "completed_orders_handler.hpp"
+
 #include <schemas/openapi.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
-#include "db/types.hpp"
+
+#include "postgres/types.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
@@ -39,8 +41,8 @@ userver::formats::json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
 
         if (res.IsEmpty()) throw ClientError{};
 
-        result.push_back(
-            res.AsSingleRow<db::Order>(userver::storages::postgres::kRowTag));
+        result.push_back(res.AsSingleRow<postgres::Order>(
+            userver::storages::postgres::kRowTag));
     }
 
     return json::ValueBuilder{result}.ExtractValue();

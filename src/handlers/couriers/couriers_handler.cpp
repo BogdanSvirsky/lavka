@@ -1,7 +1,8 @@
 #include "couriers_handler.hpp"
-#include <userver/server/handlers/exceptions.hpp>
-#include "cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
 
+#include <userver/server/handlers/exceptions.hpp>
+
+#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 

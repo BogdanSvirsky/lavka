@@ -1,4 +1,5 @@
 #include "utils.hpp"
+
 #include <userver/logging/log.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 

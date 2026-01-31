@@ -1,4 +1,5 @@
 #include "common_handler.hpp"
+
 #include <userver/components/component.hpp>
 #include <userver/storages/postgres/component.hpp>
 
