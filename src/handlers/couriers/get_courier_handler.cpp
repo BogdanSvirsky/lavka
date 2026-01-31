@@ -1,8 +1,9 @@
 #include "get_courier_handler.hpp"
+
 #include <userver/server/http/http_error.hpp>
-#include "cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
+
+#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
@@ -10,18 +11,9 @@ using namespace chaotic::openapi;
 
 namespace lavka {
 
-GetCourierHandler::GetCourierHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerBase(config, context),
-      pg_cluster_(lavka::utils::GetDBCluster(context)) {}
-
-std::string GetCourierHandler::HandleRequest(
-    userver::server::http::HttpRequest& request,
-    userver::server::request::RequestContext&) const {
-    request.GetHttpResponse().SetContentType(
-        userver::http::content_type::kApplicationJson);
-
+json::Value GetCourierHandler::HandleRequestJsonThrow(
+    const http::HttpRequest& request, const json::Value&,
+    request::RequestContext&) const {
     if (request.HasPathArg(kCourierIdPathArg)) {
         std::int64_t courierId;
         try {
@@ -32,7 +24,7 @@ std::string GetCourierHandler::HandleRequest(
             throw ClientError{};
         }
 
-        auto res = pg_cluster_->Execute(
+        auto res = GetPg().Execute(
             userver::storages::postgres::ClusterHostType::kSlave,
             "SELECT id, type, regions, working_hours FROM lavka.couriers "
             "WHERE id = $1;",
@@ -43,8 +35,7 @@ std::string GetCourierHandler::HandleRequest(
         CourierDto courier =
             res.AsSingleRow<CourierDto>(userver::storages::postgres::kRowTag);
 
-        json::Value response = json::ValueBuilder{courier}.ExtractValue();
-        return json::ToString(response);
+        return json::ValueBuilder{courier}.ExtractValue();
     } else
         throw ClientError{};
 }

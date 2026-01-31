@@ -16,18 +16,14 @@ endif()
 
 userver_setup_environment()
 
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.[hc]pp)
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+
 # Common sources
 include_directories(src)
 
-add_library(
-    ${PROJECT_NAME}_objs OBJECT
-        src/orders_handler.cpp
-        src/couriers_handler.cpp
-        src/completed_orders_handler.cpp
-        src/get_order_handler.cpp
-        src/get_courier_handler.cpp
-        src/utils.cpp
-)
+add_library(${PROJECT_NAME}_objs OBJECT ${SOURCES})
 target_link_libraries(
     ${PROJECT_NAME}_objs
     PUBLIC userver::core 

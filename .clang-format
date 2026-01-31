@@ -1,4 +1,4 @@
 BasedOnStyle: google
 DerivePointerAlignment: false
-IncludeBlocks: Preserve
+IncludeBlocks: Regroup
 IndentWidth: 4

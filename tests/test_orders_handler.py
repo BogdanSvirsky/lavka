@@ -45,13 +45,13 @@ async def test_get_orders(service_client, pgsql):
     check_orders(data, cursor)
 
     # bad request
-    response = await service_client.get('/couriers?limit=-1')
+    response = await service_client.get('/orders?limit=-1')
     assert response.status == 400
-    response = await service_client.get('/couriers?offset=-1')
+    response = await service_client.get('/orders?offset=-1')
     assert response.status == 400
-    response = await service_client.get('/couriers?offset=123')
+    response = await service_client.get('/orders?offset=123')
     assert response.status == 200
-    assert len(response.json()['couriers']) == 0
+    assert len(response.json()) == 0
 
 
 async def test_post_orders(service_client, pgsql):

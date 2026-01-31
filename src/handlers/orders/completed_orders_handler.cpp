@@ -1,29 +1,23 @@
-#include <completed_orders_handler.hpp>
+#include "completed_orders_handler.hpp"
+
 #include <schemas/openapi.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
-#include "db/types.hpp"
-#include "utils.hpp"
+
+#include "postgres/types.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 using namespace chaotic::openapi;
 
 namespace lavka {
-CompletedOrdersHandler::CompletedOrdersHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerBase(config, context),
-      pg_cluster_(lavka::utils::GetDBCluster(context)) {}
 
-std::string CompletedOrdersHandler::HandleRequest(
-    http::HttpRequest& request, request::RequestContext&) const {
-    request.GetHttpResponse().SetContentType(
-        userver::http::content_type::kApplicationJson);
-
+userver::formats::json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
+    const userver::server::http::HttpRequest&,
+    const userver::formats::json::Value& request_json,
+    userver::server::request::RequestContext&) const {
     CompleteOrderRequestDto requestDto;
     try {
-        requestDto = json::FromString(request.RequestBody())
-                         .As<CompleteOrderRequestDto>();
+        requestDto = request_json.As<CompleteOrderRequestDto>();
     } catch (json::Exception& e) {
         LOG_INFO() << "CompletedOrderHandler cathed exception '" << e.what()
                    << "' with message: " << e.GetMessage();
@@ -32,7 +26,7 @@ std::string CompletedOrdersHandler::HandleRequest(
 
     std::vector<OrderDto> result;
     for (auto completion : requestDto.complete_info) {
-        auto res = pg_cluster_->Execute(
+        auto res = GetPg().Execute(
             userver::storages::postgres::ClusterHostType::kMaster,
             "UPDATE lavka.orders "
             "SET completed_courier_id = $1, completed_time = $2 "
@@ -47,11 +41,10 @@ std::string CompletedOrdersHandler::HandleRequest(
 
         if (res.IsEmpty()) throw ClientError{};
 
-        result.push_back(
-            res.AsSingleRow<db::Order>(userver::storages::postgres::kRowTag));
+        result.push_back(res.AsSingleRow<postgres::Order>(
+            userver::storages::postgres::kRowTag));
     }
 
-    json::Value response_json = json::ValueBuilder{result}.ExtractValue();
-    return json::ToString(response_json);
+    return json::ValueBuilder{result}.ExtractValue();
 }
 }  // namespace lavka

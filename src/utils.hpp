@@ -8,7 +8,4 @@ namespace lavka::utils {
 // If they are invalid, throws ClientError
 std::pair<int, int> ExtractPagination(
     const userver::server::http::HttpRequest& request);
-
-userver::storages::postgres::ClusterPtr GetDBCluster(
-    const userver::components::ComponentContext& context);
 }  // namespace lavka::utils
