@@ -58,10 +58,12 @@ json::Value CouriersHandler::PostCouriers(
     }
 
     CreateCouriersResponse response_dto;
-
+    userver::storages::postgres::Transaction tr =
+        GetPg().Begin("couriers_creation_transaction",
+                      userver::storages::postgres::ClusterHostType::kMaster,
+                      userver::storages::postgres::Transaction::RW);
     for (CreateCourierDto courier : request_dto.couriers) {
-        auto res = GetPg().Execute(
-            userver::storages::postgres::ClusterHostType::kMaster,
+        auto res = tr.Execute(
             "INSERT INTO lavka.couriers (type, regions, working_hours) "
             "VALUES ($1, $2, $3)"
             "RETURNING id, type, regions, working_hours",
@@ -72,6 +74,7 @@ json::Value CouriersHandler::PostCouriers(
 
         response_dto.couriers.push_back(created_courier);
     }
+    tr.Commit();
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }

@@ -11,10 +11,9 @@ using namespace chaotic::openapi;
 
 namespace lavka {
 
-userver::formats::json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
-    const userver::server::http::HttpRequest&,
-    const userver::formats::json::Value& request_json,
-    userver::server::request::RequestContext&) const {
+json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
+    const http::HttpRequest&, const json::Value& request_json,
+    request::RequestContext&) const {
     CompleteOrderRequestDto requestDto;
     try {
         requestDto = request_json.As<CompleteOrderRequestDto>();
@@ -25,9 +24,12 @@ userver::formats::json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
     }
 
     std::vector<OrderDto> result;
+    userver::storages::postgres::Transaction tr =
+        GetPg().Begin("orders_completion_transaction",
+                      userver::storages::postgres::ClusterHostType::kMaster,
+                      userver::storages::postgres::Transaction::RW);
     for (auto completion : requestDto.complete_info) {
-        auto res = GetPg().Execute(
-            userver::storages::postgres::ClusterHostType::kMaster,
+        auto res = tr.Execute(
             "UPDATE lavka.orders "
             "SET completed_courier_id = $1, completed_time = $2 "
             "WHERE id = $3 AND completed_courier_id IS NULL AND completed_time "
@@ -39,11 +41,15 @@ userver::formats::json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
                 completion.complete_time.GetTimePoint()),
             completion.order_id);
 
-        if (res.IsEmpty()) throw ClientError{};
+        if (res.IsEmpty()) {
+            tr.Rollback();
+            throw ClientError{};
+        }
 
         result.push_back(res.AsSingleRow<postgres::Order>(
             userver::storages::postgres::kRowTag));
     }
+    tr.Commit();
 
     return json::ValueBuilder{result}.ExtractValue();
 }

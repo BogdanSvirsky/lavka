@@ -1,7 +1,5 @@
 import pytest
 
-from testsuite.databases import pgsql
-
 
 def format_hours(hours: list[str]) -> str:
     return "'{\"" + "\",\"".join(hours) + "\"}'"
@@ -55,7 +53,6 @@ async def test_get_couriers(service_client, pgsql):
 
 
 async def test_post_couriers(service_client, pgsql):
-    # correct request test
     request_body = {
         "couriers": [
             {
@@ -85,17 +82,48 @@ async def test_post_couriers(service_client, pgsql):
     for courier_json in request_body["couriers"]:
         cursor.execute("""
                 SELECT id FROM lavka.couriers
-                WHERE type = '{}' AND regions = '{}' AND working_hours = '{}';
+                WHERE type = '{}' AND regions = '{}' AND working_hours = {};
                 """.format(courier_json['courier_type'],
                            "{" + ", ".join(str(x)
                                            for x in courier_json['regions']) + "}",
-                           "{\"" + "\",\"".join(courier_json['working_hours']) + "\"}"))
+                           format_hours(courier_json['working_hours'])))
         res = cursor.fetchall()
         assert len(res) == 1
 
         courier_json["courier_id"] = res[0][0]
         assert courier_json in response_body["couriers"]
 
+
+async def test_transactions(service_client, pgsql):
+    request_body = {
+        "couriers": [
+            {
+                "courier_type": "AUTO",
+                "regions": [54, 154],
+                "working_hours": ["10:00-12:00"]
+            },
+            {
+                "courier_type": "BIKE",
+                "regions": [42],
+                "working_hours": ["13:00-20:00", "09:00-11:00"]
+            },
+            {
+                "courier_type": "FOOTBALL",
+                "regions": [98],
+                "working_hours": ["09:00-17:00"]
+            }
+        ]
+    }
+    response = await service_client.post("/couriers", request_body)
+    assert response.status_code == 400
+
+    cursor = pgsql['lavka'].cursor()
+    cursor.execute("SELECT * FROM lavka.couriers;")
+    res = cursor.fetchall()
+    assert len(res) == 0
+
+
+async def test_bad_request(service_client):
     # empty request test
     response = await service_client.post("/couriers")
     assert response.status_code == 400
