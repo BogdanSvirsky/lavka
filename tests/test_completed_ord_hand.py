@@ -5,6 +5,7 @@ import pytest
 async def test_order_completion(service_client, pgsql):
     cursor = pgsql['lavka'].cursor()
 
+    # test good request
     cursor.execute(
         "SELECT id FROM lavka.orders WHERE completed_time IS NULL LIMIT 3;")
     orders_ids = cursor.fetchall()
@@ -36,6 +37,47 @@ async def test_order_completion(service_client, pgsql):
     response = await service_client.post("/orders/complete", request_json)
     assert response.status_code == 200
 
+    # test transactions
+    cursor.execute(
+        "SELECT id FROM lavka.orders WHERE completed_time IS NULL LIMIT 3;")
+    orders_ids = cursor.fetchall()
+
+    cursor.execute(
+        "SELECT id FROM lavka.couriers LIMIT 3;")
+    couriers_ids = cursor.fetchall()
+
+    request_json = {
+        "complete_info": [
+            {
+                "complete_time": "2024-05-09T20:55:59.547Z",
+                "courier_id": couriers_ids[0][0],
+                "order_id": orders_ids[0][0]
+            },
+            {
+                "complete_time": "2025-05-09T20:55:59.547Z",
+                "courier_id": couriers_ids[1][0],
+                "order_id": orders_ids[1][0]
+            },
+            {
+                "complete_time": "2026-05-09T20:55:59.547Z",
+                "courier_id": 52525252,
+                "order_id": 99999
+            }
+        ]
+    }
+
+    response = await service_client.post("/orders/complete", request_json)
+    assert response.status_code == 400
+
+    cursor.execute(
+        f"SELECT completed_time FROM lavka.orders \
+            WHERE id = {orders_ids[0][0]} OR id = {orders_ids[1][0]} OR id = {orders_ids[2][0]};")
+    res = cursor.fetchall()
+
+    for row in res:
+        assert row[0] is None
+
+    # test bad request
     request_json = {
         "complete_time": "2024-05-09T20:55:59.547Z",
         "courier_id": 1,
