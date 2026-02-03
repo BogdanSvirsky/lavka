@@ -62,17 +62,18 @@ json::Value CouriersHandler::PostCouriers(
         throw handlers::ClientError();
     }
 
-    std::vector<lavka::postgres::CreateCourierRequest> postgres_requests;
+    std::vector<lavka::postgres::Courier> couriers_to_create;
 
     for (CreateCourierDto dto : request_dto.couriers)
-        postgres_requests.push_back(
-            {utils::TranslateCourierType(dto.courier_type), dto.regions,
-             dto.working_hours});
+        couriers_to_create.push_back(
+            {.type = utils::TranslateCourierType(dto.courier_type),
+             .regions = dto.regions,
+             .working_hours = dto.working_hours});
 
     std::vector<lavka::postgres::Courier> created_couriers;
     try {
         created_couriers =
-            couriers_repository_ptr->CreateAll(postgres_requests);
+            couriers_repository_ptr->CreateAll(couriers_to_create);
     } catch (std::invalid_argument& e) {
         LOG_DEBUG() << e.what();
         throw handlers::ClientError{};

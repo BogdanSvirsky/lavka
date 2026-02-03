@@ -8,14 +8,14 @@ CourierRepository::CourierRepository(
     : pg_cluster_(pg_cluster_) {};
 
 std::vector<Courier> CourierRepository::CreateAll(
-    std::vector<CreateCourierRequest> create_couriers_request) {
+    std::vector<Courier> couriers_to_create) {
     std::vector<Courier> created_couriers;
 
     userver::storages::postgres::Transaction tr = pg_cluster_->Begin(
         "couriers_creation_transaction",
         userver::storages::postgres::ClusterHostType::kMaster,
         userver::storages::postgres::Transaction::RW);
-    for (CreateCourierRequest& courier_request : create_couriers_request) {
+    for (auto& courier_request : couriers_to_create) {
         auto res = tr.Execute(
             "INSERT INTO lavka.couriers (type, regions, working_hours) "
             "VALUES ($1, $2, $3)"
