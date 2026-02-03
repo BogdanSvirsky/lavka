@@ -1,56 +1,62 @@
 #include "completed_orders_handler.hpp"
 
 #include <schemas/openapi.hpp>
+#include <userver/components/component_context.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 
 #include "postgres/order.hpp"
+#include "repository_manager.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 using namespace chaotic::openapi;
 
 namespace lavka {
+CompletedOrdersHandler::CompletedOrdersHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerJsonBase(config, context),
+      order_repository(
+          context.FindComponent<RepositoryManager>().GetOrderRepository()) {}
 
 json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
     const http::HttpRequest&, const json::Value& request_json,
     request::RequestContext&) const {
-    CompleteOrderRequestDto requestDto;
+    CompleteOrderRequestDto request_dto;
     try {
-        requestDto = request_json.As<CompleteOrderRequestDto>();
+        request_dto = request_json.As<CompleteOrderRequestDto>();
     } catch (json::Exception& e) {
         LOG_INFO() << "CompletedOrderHandler cathed exception '" << e.what()
                    << "' with message: " << e.GetMessage();
         throw ClientError{};
     }
 
-    std::vector<OrderDto> result;
-    userver::storages::postgres::Transaction tr =
-        GetPg().Begin("orders_completion_transaction",
-                      userver::storages::postgres::ClusterHostType::kMaster,
-                      userver::storages::postgres::Transaction::RW);
-    for (auto completion : requestDto.complete_info) {
-        auto res = tr.Execute(
-            "UPDATE lavka.orders "
-            "SET completed_courier_id = $1, completed_time = $2 "
-            "WHERE id = $3 AND completed_courier_id IS NULL AND completed_time "
-            "IS NULL "
-            "RETURNING id, weight, regions, delivery_hours, cost, "
-            "completed_time;",
-            completion.courier_id,
-            userver::storages::postgres::TimePointWithoutTz(
-                completion.complete_time.GetTimePoint()),
-            completion.order_id);
-
-        if (res.IsEmpty()) {
-            tr.Rollback();
-            throw ClientError{};
+    std::vector<postgres::Order> orders_to_update;
+    for (auto complete_info : request_dto.complete_info) {
+        postgres::Order order;
+        try {
+            order = order_repository->GetById(complete_info.order_id);
+        } catch (std::invalid_argument& e) {
+            throw handlers::ClientError{};
         }
+        order.completed_courier_id = complete_info.courier_id;
+        order.completed_time = userver::storages::postgres::TimePointWithoutTz{
+            complete_info.complete_time};
 
-        result.push_back(res.AsSingleRow<postgres::Order>(
-            userver::storages::postgres::kRowTag));
+        orders_to_update.push_back(order);
     }
-    tr.Commit();
 
-    return json::ValueBuilder{result}.ExtractValue();
+    std::vector<postgres::Order> updated_orders;
+    try {
+        updated_orders = order_repository->UpdateAll(orders_to_update);
+    } catch (std::invalid_argument& e) {
+        throw handlers::ClientError{};
+    }
+
+    std::vector<OrderDto> response_dto;
+    for (auto updated_order : updated_orders)
+        response_dto.push_back(updated_order);
+
+    return json::ValueBuilder{response_dto}.ExtractValue();
 }
 }  // namespace lavka

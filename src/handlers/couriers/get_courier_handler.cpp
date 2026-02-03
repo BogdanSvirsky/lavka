@@ -18,7 +18,7 @@ GetCourierHandler::GetCourierHandler(
     const userver::components::ComponentContext& context)
     : HttpHandlerJsonBase(config, context),
       couriers_repository_ptr(
-          context.FindComponent<RepositoryManager>().GetCouriersRepository()) {}
+          context.FindComponent<RepositoryManager>().GetCourierRepository()) {}
 
 json::Value GetCourierHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value&,

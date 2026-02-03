@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -13,6 +14,7 @@ struct Order {
     std::int32_t regions{};
     std::vector<std::string> delivery_hours{};
     std::int32_t cost{};
+    std::optional<std::int64_t> completed_courier_id{};
     std::optional<userver::storages::postgres::TimePointWithoutTz>
         completed_time{};
 

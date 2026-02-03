@@ -2,10 +2,13 @@
 #include <userver/storages/postgres/cluster.hpp>
 
 #include "postgres/courier_repository.hpp"
+#include "postgres/order_repository.hpp"
 
 namespace lavka {
 class RepositoryManager final : public userver::components::ComponentBase {
-    lavka::postgres::CourierRepositoryPtr couriers_repository_ptr;
+    userver::storages::postgres::ClusterPtr pg_cluster_;
+    lavka::postgres::CourierRepositoryPtr courier_repository;
+    lavka::postgres::OrderRepositoryPtr order_repository;
 
    public:
     static constexpr std::string_view kName = "repository-manager";
@@ -13,7 +16,8 @@ class RepositoryManager final : public userver::components::ComponentBase {
     RepositoryManager(const userver::components::ComponentConfig& config,
                       const userver::components::ComponentContext& context);
 
-    lavka::postgres::CourierRepositoryPtr GetCouriersRepository();
+    lavka::postgres::CourierRepositoryPtr GetCourierRepository();
+    lavka::postgres::OrderRepositoryPtr GetOrderRepository();
 };
 }  // namespace lavka
 

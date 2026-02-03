@@ -39,6 +39,9 @@ std::vector<Courier> CourierRepository::CreateAll(
 }
 
 std::vector<Courier> CourierRepository::GetAll(int limit, int offset) {
+    if (limit < 1 || offset < 0)
+        throw std::invalid_argument{"Bad limit or offset!"};
+
     auto query_result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kSlave,
         "SELECT id, type, regions, working_hours FROM lavka.couriers\n"

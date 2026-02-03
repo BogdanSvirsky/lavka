@@ -17,7 +17,7 @@ CouriersHandler::CouriersHandler(
     const userver::components::ComponentContext& context)
     : HttpHandlerJsonBase(config, context),
       couriers_repository_ptr(context.FindComponent<lavka::RepositoryManager>()
-                                  .GetCouriersRepository()) {}
+                                  .GetCourierRepository()) {}
 
 json::Value CouriersHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value& request_json,
