@@ -1,13 +1,13 @@
-#include "couriers_repository.hpp"
+#include "courier_repository.hpp"
 
 #include <stdexcept>
 
 namespace lavka::postgres {
-CouriersRepository::CouriersRepository(
+CourierRepository::CourierRepository(
     userver::storages::postgres::ClusterPtr pg_cluster_)
     : pg_cluster_(pg_cluster_) {};
 
-std::vector<Courier> CouriersRepository::CreateAll(
+std::vector<Courier> CourierRepository::CreateAll(
     std::vector<CreateCourierRequest> create_couriers_request) {
     std::vector<Courier> created_couriers;
 
@@ -38,7 +38,7 @@ std::vector<Courier> CouriersRepository::CreateAll(
     return created_couriers;
 }
 
-std::vector<Courier> CouriersRepository::GetAll(int limit, int offset) {
+std::vector<Courier> CourierRepository::GetAll(int limit, int offset) {
     auto query_result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kSlave,
         "SELECT id, type, regions, working_hours FROM lavka.couriers\n"
@@ -53,7 +53,7 @@ std::vector<Courier> CouriersRepository::GetAll(int limit, int offset) {
     return couriers;
 }
 
-Courier CouriersRepository::GetById(std::int64_t id) {
+Courier CourierRepository::GetById(std::int64_t id) {
     auto res = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kSlave,
         "SELECT id, type, regions, working_hours FROM lavka.couriers "

@@ -9,11 +9,11 @@ RepositoryManager::RepositoryManager(
     const userver::components::ComponentContext& context)
     : ComponentBase(config, context),
       couriers_repository_ptr(
-          std::make_shared<lavka::postgres::CouriersRepository>(
+          std::make_shared<lavka::postgres::CourierRepository>(
               context.FindComponent<userver::components::Postgres>("lavka-db")
                   .GetCluster())) {}
 
-lavka::postgres::CouriersRepositoryPtr
+lavka::postgres::CourierRepositoryPtr
 RepositoryManager::GetCouriersRepository() {
     return couriers_repository_ptr;
 }

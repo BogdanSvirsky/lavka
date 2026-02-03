@@ -1,12 +1,12 @@
 #include <userver/server/handlers/http_handler_json_base.hpp>
 #include <userver/storages/postgres/cluster.hpp>
 
-#include "postgres/couriers_repository.hpp"
+#include "postgres/courier_repository.hpp"
 
 namespace lavka {
 class GetCourierHandler
     : public userver::server::handlers::HttpHandlerJsonBase {
-    lavka::postgres::CouriersRepositoryPtr couriers_repository_ptr;
+    lavka::postgres::CourierRepositoryPtr couriers_repository_ptr;
 
    public:
     static constexpr std::string_view kName = "get-courier-handler";

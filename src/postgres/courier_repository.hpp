@@ -11,11 +11,11 @@ struct CreateCourierRequest {
     std::vector<std::string> working_hours;
 };
 
-class CouriersRepository {
+class CourierRepository {
     userver::storages::postgres::ClusterPtr pg_cluster_;
 
    public:
-    CouriersRepository(userver::storages::postgres::ClusterPtr pg_cluster_);
+    CourierRepository(userver::storages::postgres::ClusterPtr pg_cluster_);
 
     std::vector<Courier> GetAll(int limit, int offset);
 
@@ -26,5 +26,5 @@ class CouriersRepository {
     Courier GetById(std::int64_t id);
 };
 
-using CouriersRepositoryPtr = std::shared_ptr<CouriersRepository>;
+using CourierRepositoryPtr = std::shared_ptr<CourierRepository>;
 }  // namespace lavka::postgres
