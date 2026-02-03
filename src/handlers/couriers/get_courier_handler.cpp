@@ -1,15 +1,24 @@
 #include "get_courier_handler.hpp"
 
+#include <userver/components/component_context.hpp>
 #include <userver/server/http/http_error.hpp>
 
-#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
+#include "repository_manager.hpp"
 #include "schemas/openapi.hpp"
+#include "utils.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 using namespace chaotic::openapi;
 
 namespace lavka {
+
+GetCourierHandler::GetCourierHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerJsonBase(config, context),
+      couriers_repository_ptr(
+          context.FindComponent<RepositoryManager>().GetCouriersRepository()) {}
 
 json::Value GetCourierHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value&,
@@ -24,18 +33,17 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
             throw ClientError{};
         }
 
-        auto res = GetPg().Execute(
-            userver::storages::postgres::ClusterHostType::kSlave,
-            "SELECT id, type, regions, working_hours FROM lavka.couriers "
-            "WHERE id = $1;",
-            courierId);
+        postgres::Courier courier;
+        try {
+            courier = couriers_repository_ptr->GetById(courierId);
+        } catch (std::invalid_argument& e) {
+            throw handlers::ClientError{};
+        }
 
-        if (res.IsEmpty()) throw ClientError{};
-
-        CourierDto courier =
-            res.AsSingleRow<CourierDto>(userver::storages::postgres::kRowTag);
-
-        return json::ValueBuilder{courier}.ExtractValue();
+        CourierDto courier_dto{courier.id,
+                               utils::TranslateCourierType(courier.type),
+                               courier.regions, courier.working_hours};
+        return json::ValueBuilder{courier_dto}.ExtractValue();
     } else
         throw ClientError{};
 }

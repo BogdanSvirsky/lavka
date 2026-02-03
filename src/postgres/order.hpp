@@ -24,6 +24,6 @@ struct Order {
                 completed_time->GetUnderlying()};
         }
         return result;
-    }
+    }  // TODO: remove
 };
 }  // namespace lavka::postgres

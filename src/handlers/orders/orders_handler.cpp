@@ -6,8 +6,7 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/storages/postgres/component.hpp>
 
-#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
-#include "postgres/types.hpp"
+#include "postgres/order.hpp"
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 

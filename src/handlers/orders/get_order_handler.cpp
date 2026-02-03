@@ -1,6 +1,6 @@
 #include "get_order_handler.hpp"
 
-#include "postgres/types.hpp"
+#include "postgres/order.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;

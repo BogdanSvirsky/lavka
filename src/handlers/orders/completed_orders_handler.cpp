@@ -3,7 +3,7 @@
 #include <schemas/openapi.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 
-#include "postgres/types.hpp"
+#include "postgres/order.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;

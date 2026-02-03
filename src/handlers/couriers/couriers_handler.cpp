@@ -1,8 +1,9 @@
 #include "couriers_handler.hpp"
 
+#include <userver/components/component.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
-#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
+#include "repository_manager.hpp"
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 
@@ -11,6 +12,13 @@ using namespace userver::formats;
 using namespace chaotic::openapi;
 
 namespace lavka {
+CouriersHandler::CouriersHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerJsonBase(config, context),
+      couriers_repository_ptr(context.FindComponent<lavka::RepositoryManager>()
+                                  .GetCouriersRepository()) {}
+
 json::Value CouriersHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value& request_json,
     userver::server::request::RequestContext&) const {
@@ -30,16 +38,13 @@ json::Value CouriersHandler::GetCouriers(
 
     LOG_DEBUG() << limit << " " << offset;
 
-    auto res = GetPg().Execute(
-        userver::storages::postgres::ClusterHostType::kSlave,
-        "SELECT id, type, regions, working_hours FROM lavka.couriers\n"
-        "ORDER BY id LIMIT $1 OFFSET $2;",
-        limit, offset);
+    auto couriers = couriers_repository_ptr->GetAll(limit, offset);
 
     GetCouriersResponse response_dto{.limit = limit, .offset = offset};
-    for (CourierDto courier :
-         res.AsSetOf<CourierDto>(userver::storages::postgres::kRowTag)) {
-        response_dto.couriers.push_back(courier);
+    for (auto courier : couriers) {
+        response_dto.couriers.push_back(
+            {courier.id, utils::TranslateCourierType(courier.type),
+             courier.regions, courier.working_hours});
     }
 
     return json::ValueBuilder{response_dto}.ExtractValue();
@@ -57,24 +62,28 @@ json::Value CouriersHandler::PostCouriers(
         throw handlers::ClientError();
     }
 
-    CreateCouriersResponse response_dto;
-    userver::storages::postgres::Transaction tr =
-        GetPg().Begin("couriers_creation_transaction",
-                      userver::storages::postgres::ClusterHostType::kMaster,
-                      userver::storages::postgres::Transaction::RW);
-    for (CreateCourierDto courier : request_dto.couriers) {
-        auto res = tr.Execute(
-            "INSERT INTO lavka.couriers (type, regions, working_hours) "
-            "VALUES ($1, $2, $3)"
-            "RETURNING id, type, regions, working_hours",
-            courier.courier_type, courier.regions, courier.working_hours);
+    std::vector<lavka::postgres::CreateCourierRequest> postgres_requests;
 
-        CourierDto created_courier =
-            res.AsSingleRow<CourierDto>(userver::storages::postgres::kRowTag);
+    for (CreateCourierDto dto : request_dto.couriers)
+        postgres_requests.push_back(
+            {utils::TranslateCourierType(dto.courier_type), dto.regions,
+             dto.working_hours});
 
-        response_dto.couriers.push_back(created_courier);
+    std::vector<lavka::postgres::Courier> created_couriers;
+    try {
+        created_couriers =
+            couriers_repository_ptr->CreateAll(postgres_requests);
+    } catch (std::invalid_argument& e) {
+        LOG_DEBUG() << e.what();
+        throw handlers::ClientError{};
     }
-    tr.Commit();
+
+    CreateCouriersResponse response_dto;
+    for (auto& created_courier : created_couriers)
+        response_dto.couriers.push_back(
+            {created_courier.id,
+             utils::TranslateCourierType(created_courier.type),
+             created_courier.regions, created_courier.working_hours});
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }
