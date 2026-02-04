@@ -2,23 +2,22 @@
 #include <userver/storages/postgres/cluster.hpp>
 #include <vector>
 
-#include "courier.hpp"
+#include "domain/repositories/courier_repository.hpp"
 
 namespace lavka::postgres {
-class CourierRepository {
+class CourierRepository final : public lavka::domain::ICourierRepository {
     userver::storages::postgres::ClusterPtr pg_cluster_;
 
    public:
     CourierRepository(userver::storages::postgres::ClusterPtr pg_cluster_);
 
-    std::vector<Courier> GetAll(int limit, int offset);
+    std::vector<domain::Courier> GetAll(int limit, int offset) override;
 
     // Throws an std::invalid_argument when can't create at least one argument
-    std::vector<Courier> CreateAll(std::vector<Courier> couriers_to_create);
+    std::vector<domain::Courier> CreateAll(
+        std::vector<domain::Courier> couriers_to_create) override;
 
     // Throws an std::invalid_argument when can't find courier
-    Courier GetById(std::int64_t id);
+    domain::Courier GetById(std::int64_t id) override;
 };
-
-using CourierRepositoryPtr = std::shared_ptr<CourierRepository>;
 }  // namespace lavka::postgres

@@ -23,6 +23,4 @@ class OrderRepository final : public domain::IOrderRepository {
     std::vector<domain::Order> UpdateAll(
         std::vector<domain::Order> orders_to_update) override;
 };
-
-using OrderRepositoryPtr = std::shared_ptr<OrderRepository>;
 }  // namespace lavka::postgres

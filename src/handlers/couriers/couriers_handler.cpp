@@ -43,7 +43,7 @@ json::Value CouriersHandler::GetCouriers(
     GetCouriersResponse response_dto{.limit = limit, .offset = offset};
     for (auto courier : couriers) {
         response_dto.couriers.push_back(
-            {courier.id, utils::TranslateCourierType(courier.type),
+            {courier.id, chaotic::openapi::CourierType(courier.type),
              courier.regions, courier.working_hours});
     }
 
@@ -62,15 +62,15 @@ json::Value CouriersHandler::PostCouriers(
         throw handlers::ClientError();
     }
 
-    std::vector<lavka::postgres::Courier> couriers_to_create;
+    std::vector<domain::Courier> couriers_to_create;
 
     for (CreateCourierDto dto : request_dto.couriers)
         couriers_to_create.push_back(
-            {.type = utils::TranslateCourierType(dto.courier_type),
+            {.type = domain::Courier::Type(dto.courier_type),
              .regions = dto.regions,
              .working_hours = dto.working_hours});
 
-    std::vector<lavka::postgres::Courier> created_couriers;
+    std::vector<domain::Courier> created_couriers;
     try {
         created_couriers =
             couriers_repository_ptr->CreateAll(couriers_to_create);
@@ -83,7 +83,7 @@ json::Value CouriersHandler::PostCouriers(
     for (auto& created_courier : created_couriers)
         response_dto.couriers.push_back(
             {created_courier.id,
-             utils::TranslateCourierType(created_courier.type),
+             chaotic::openapi::CourierType(created_courier.type),
              created_courier.regions, created_courier.working_hours});
 
     return json::ValueBuilder{response_dto}.ExtractValue();

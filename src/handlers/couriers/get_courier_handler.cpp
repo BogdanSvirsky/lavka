@@ -5,7 +5,6 @@
 
 #include "repository_manager.hpp"
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
@@ -33,7 +32,7 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
             throw ClientError{};
         }
 
-        postgres::Courier courier;
+        domain::Courier courier;
         try {
             courier = couriers_repository_ptr->GetById(courierId);
         } catch (std::invalid_argument& e) {
@@ -41,7 +40,7 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
         }
 
         CourierDto courier_dto{courier.id,
-                               utils::TranslateCourierType(courier.type),
+                               chaotic::openapi::CourierType(courier.type),
                                courier.regions, courier.working_hours};
         return json::ValueBuilder{courier_dto}.ExtractValue();
     } else

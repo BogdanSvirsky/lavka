@@ -17,8 +17,6 @@ class IOrderRepository {
     // Throws an std::invalid_argument when can't update one of the orders
     virtual std::vector<Order> UpdateAll(
         std::vector<Order> orders_to_update) = 0;
-
-    virtual ~IOrderRepository() {}
 };
 
 using IOrderRepositoryPtr = std::shared_ptr<IOrderRepository>;
