@@ -1,12 +1,21 @@
 #include "get_order_handler.hpp"
 
-#include "postgres/types.hpp"
+#include <userver/components/component_context.hpp>
+
+#include "postgres/order.hpp"
+#include "repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 
 namespace lavka {
+GetOrderHandler::GetOrderHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerJsonBase(config, context),
+      order_repository(
+          context.FindComponent<RepositoryManager>().GetOrderRepository()) {}
 
 json::Value GetOrderHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value&,
@@ -21,18 +30,14 @@ json::Value GetOrderHandler::HandleRequestJsonThrow(
     } else
         throw ClientError{};
 
-    auto res = GetPg().Execute(
-        userver::storages::postgres::ClusterHostType::kSlave,
-        "SELECT id, weight, regions, delivery_hours, cost, completed_time "
-        "FROM lavka.orders WHERE id = $1;",
-        order_id);
+    postgres::Order order;
+    try {
+        order = order_repository->GetById(order_id);
+    } catch (std::invalid_argument& e) {
+        throw handlers::ClientError{};
+    }
 
-    if (res.IsEmpty()) throw ClientError{};
-
-    chaotic::openapi::OrderDto order = res.AsSingleRow<lavka::postgres::Order>(
-        userver::storages::postgres::kRowTag);
-
-    return json::ValueBuilder{order}.ExtractValue();
+    return json::ValueBuilder{chaotic::openapi::OrderDto(order)}.ExtractValue();
 }
 
 }  // namespace lavka

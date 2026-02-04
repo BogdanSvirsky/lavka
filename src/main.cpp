@@ -9,6 +9,7 @@
 #include "handlers/orders/completed_orders_handler.hpp"
 #include "handlers/orders/get_order_handler.hpp"
 #include "handlers/orders/orders_handler.hpp"
+#include "repository_manager.hpp"
 
 int main(int argc, char* argv[]) {
     auto component_list = userver::components::MinimalServerComponentList()
@@ -19,7 +20,8 @@ int main(int argc, char* argv[]) {
                               .Append<lavka::GetCourierHandler>()
                               .Append<userver::components::TestsuiteSupport>()
                               .Append<userver::components::Postgres>("lavka-db")
-                              .Append<userver::clients::dns::Component>();
+                              .Append<userver::clients::dns::Component>()
+                              .Append<lavka::RepositoryManager>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

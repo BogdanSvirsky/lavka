@@ -1,15 +1,18 @@
-#include <userver/server/handlers/http_handler_base.hpp>
+#include <userver/server/handlers/http_handler_json_base.hpp>
 #include <userver/storages/postgres/cluster.hpp>
 
-#include "handlers/common_handler.hpp"
+#include "postgres/order_repository.hpp"
 
 namespace lavka {
-class GetOrderHandler : public lavka::CommonHandler {
+class GetOrderHandler : public userver::server::handlers::HttpHandlerJsonBase {
+    lavka::postgres::OrderRepositoryPtr order_repository;
+
    public:
     static constexpr std::string_view kName = "get-order-handler";
     static constexpr std::string_view kOrderIdPathArg = "order_id";
 
-    using CommonHandler::CommonHandler;
+    GetOrderHandler(const userver::components::ComponentConfig& config,
+                    const userver::components::ComponentContext& context);
 
     userver::formats::json::Value HandleRequestJsonThrow(
         const userver::server::http::HttpRequest& request,

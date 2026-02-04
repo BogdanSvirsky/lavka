@@ -6,8 +6,8 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/storages/postgres/component.hpp>
 
-#include "postgres/cpp_to_user_pg_map.hpp"  // IWYU pragma: keep
-#include "postgres/types.hpp"
+#include "postgres/order.hpp"
+#include "repository_manager.hpp"
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 
@@ -15,6 +15,12 @@ using namespace userver::server;
 using namespace userver::formats;
 
 namespace lavka {
+OrdersHandler::OrdersHandler(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : HttpHandlerJsonBase(config, context),
+      order_repository(
+          context.FindComponent<RepositoryManager>().GetOrderRepository()) {}
 
 json::Value OrdersHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value& request_json,
@@ -33,22 +39,13 @@ json::Value OrdersHandler::GetOrders(
     const userver::server::http::HttpRequest& request) const {
     auto [limit, offset] = lavka::utils::ExtractPagination(request);
 
-    auto res =
-        GetPg()
-            .Execute(userver::storages::postgres::ClusterHostType::kSlave,
-                     "SELECT id, weight, regions, delivery_hours, cost, "
-                     "completed_time FROM "
-                     "lavka.orders\n"
-                     "ORDER BY id LIMIT $1 OFFSET $2;",
-                     limit, offset)
-            .AsSetOf<postgres::Order>(userver::storages::postgres::kRowTag);
-
-    std::vector<chaotic::openapi::OrderDto> resultArr;
-    for (postgres::Order order : res) {
-        resultArr.push_back(order);
+    auto orders = order_repository->GetAll(limit, offset);
+    std::vector<chaotic::openapi::OrderDto> response_dto;
+    for (auto order : orders) {
+        response_dto.push_back(order);
     }
 
-    return json::ValueBuilder{resultArr}.ExtractValue();
+    return json::ValueBuilder{response_dto}.ExtractValue();
 }
 
 json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
@@ -59,24 +56,21 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
         throw ClientError{};
     }
 
-    std::vector<chaotic::openapi::OrderDto> result;
-    userver::storages::postgres::Transaction tr =
-        GetPg().Begin("orders_creation_transaction",
-                      userver::storages::postgres::ClusterHostType::kMaster,
-                      userver::storages::postgres::Transaction::RW);
-    for (chaotic::openapi::CreateOrderDto order : request_dto.orders) {
-        postgres::Order created_order =
-            tr.Execute(
-                  "INSERT INTO lavka.orders(weight, regions, delivery_hours, "
-                  "cost) VALUES ($1, $2, $3, $4) RETURNING id, weight, "
-                  "regions, "
-                  "delivery_hours, cost, completed_time",
-                  order.weight, order.regions, order.delivery_hours, order.cost)
-                .AsSingleRow<postgres::Order>(
-                    userver::storages::postgres::kRowTag);
-        result.push_back(created_order);
-    }
-    tr.Commit();
-    return json::ValueBuilder{result}.ExtractValue();
+    std::vector<postgres::Order> orders_to_create;
+    for (auto create_order_dto : request_dto.orders)
+        orders_to_create.push_back({
+            .weight = static_cast<float>(create_order_dto.weight),
+            .regions = create_order_dto.regions,
+            .delivery_hours = create_order_dto.delivery_hours,
+            .cost = create_order_dto.cost,
+        });
+
+    auto created_orders = order_repository->CreateAll(orders_to_create);
+
+    std::vector<chaotic::openapi::OrderDto> response_dto;
+    for (auto created_order : created_orders)
+        response_dto.push_back(created_order);
+
+    return json::ValueBuilder{response_dto}.ExtractValue();
 }
 };  // namespace lavka
