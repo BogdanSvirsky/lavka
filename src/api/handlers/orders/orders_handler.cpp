@@ -6,7 +6,7 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/storages/postgres/component.hpp>
 
-#include "repository_manager.hpp"
+#include "infrastructure/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 

@@ -1,7 +1,6 @@
 #pragma once
-#include <userver/storages/postgres/io/io_fwd.hpp>
-#include <userver/storages/postgres/io/pg_types.hpp>
-#include <userver/utils/trivial_map.hpp>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 namespace lavka::domain {

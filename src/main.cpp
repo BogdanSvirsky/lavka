@@ -4,12 +4,12 @@
 #include <userver/testsuite/testsuite_support.hpp>
 #include <userver/utils/daemon_run.hpp>
 
-#include "handlers/couriers/couriers_handler.hpp"
-#include "handlers/couriers/get_courier_handler.hpp"
-#include "handlers/orders/completed_orders_handler.hpp"
-#include "handlers/orders/get_order_handler.hpp"
-#include "handlers/orders/orders_handler.hpp"
-#include "repository_manager.hpp"
+#include "api/handlers/couriers/couriers_handler.hpp"
+#include "api/handlers/couriers/get_courier_handler.hpp"
+#include "api/handlers/orders/completed_orders_handler.hpp"
+#include "api/handlers/orders/get_order_handler.hpp"
+#include "api/handlers/orders/orders_handler.hpp"
+#include "infrastructure/repository_manager.hpp"
 
 int main(int argc, char* argv[]) {
     auto component_list = userver::components::MinimalServerComponentList()

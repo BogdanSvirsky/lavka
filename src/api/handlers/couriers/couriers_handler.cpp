@@ -3,7 +3,7 @@
 #include <userver/components/component.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
-#include "repository_manager.hpp"
+#include "infrastructure/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 #include "utils.hpp"
 

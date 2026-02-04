@@ -2,7 +2,7 @@
 
 #include <userver/components/component_context.hpp>
 
-#include "repository_manager.hpp"
+#include "infrastructure/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;

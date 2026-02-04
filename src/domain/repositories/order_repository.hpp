@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "domain/entities/order.hpp"
 
 namespace lavka::domain {
