@@ -3,15 +3,13 @@
 #include <userver/components/component_context.hpp>
 #include <userver/server/http/http_error.hpp>
 
-#include "repository_manager.hpp"
+#include "infrastructure/repository_manager.hpp"
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
-using namespace chaotic::openapi;
 
-namespace lavka {
+namespace lavka::api {
 
 GetCourierHandler::GetCourierHandler(
     const userver::components::ComponentConfig& config,
@@ -33,19 +31,18 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
             throw ClientError{};
         }
 
-        postgres::Courier courier;
+        domain::Courier courier;
         try {
             courier = couriers_repository_ptr->GetById(courierId);
         } catch (std::invalid_argument& e) {
             throw handlers::ClientError{};
         }
 
-        CourierDto courier_dto{courier.id,
-                               utils::TranslateCourierType(courier.type),
+        CourierDto courier_dto{courier.id, CourierType(courier.type),
                                courier.regions, courier.working_hours};
         return json::ValueBuilder{courier_dto}.ExtractValue();
     } else
         throw ClientError{};
 }
 
-}  // namespace lavka
+}  // namespace lavka::api

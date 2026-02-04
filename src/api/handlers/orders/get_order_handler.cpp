@@ -2,14 +2,13 @@
 
 #include <userver/components/component_context.hpp>
 
-#include "postgres/order.hpp"
-#include "repository_manager.hpp"
+#include "infrastructure/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 
-namespace lavka {
+namespace lavka::api {
 GetOrderHandler::GetOrderHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
@@ -30,14 +29,16 @@ json::Value GetOrderHandler::HandleRequestJsonThrow(
     } else
         throw ClientError{};
 
-    postgres::Order order;
+    domain::Order order;
     try {
         order = order_repository->GetById(order_id);
     } catch (std::invalid_argument& e) {
         throw handlers::ClientError{};
     }
+    OrderDto response_dto{order.id,      order.weight,
+                          order.regions, order.delivery_hours,
+                          order.cost,    order.completed_time};
 
-    return json::ValueBuilder{chaotic::openapi::OrderDto(order)}.ExtractValue();
+    return json::ValueBuilder{response_dto}.ExtractValue();
 }
-
-}  // namespace lavka
+}  // namespace lavka::api

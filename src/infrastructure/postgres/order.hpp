@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "domain/entities/order.hpp"
-#include "schemas/openapi.hpp"
 
 namespace lavka::postgres {
 struct Order {
@@ -27,15 +26,5 @@ struct Order {
                 userver::utils::datetime::TimePointTz{completed_time.value()};
         return order;
     }
-
-    operator chaotic::openapi::OrderDto() const {
-        chaotic::openapi::OrderDto result{id, weight, regions, delivery_hours,
-                                          cost};
-        if (completed_time) {
-            result.completed_time =
-                userver::utils::datetime::TimePointTz{completed_time.value()};
-        }
-        return result;
-    }  // TODO: remove
 };
 }  // namespace lavka::postgres
