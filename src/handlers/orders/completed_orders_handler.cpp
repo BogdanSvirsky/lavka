@@ -4,7 +4,6 @@
 #include <userver/components/component_context.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 
-#include "postgres/order.hpp"
 #include "repository_manager.hpp"
 
 using namespace userver::formats;
@@ -31,22 +30,21 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
         throw ClientError{};
     }
 
-    std::vector<postgres::Order> orders_to_update;
+    std::vector<domain::Order> orders_to_update;
     for (auto complete_info : request_dto.complete_info) {
-        postgres::Order order;
+        domain::Order order;
         try {
             order = order_repository->GetById(complete_info.order_id);
         } catch (std::invalid_argument& e) {
             throw handlers::ClientError{};
         }
         order.completed_courier_id = complete_info.courier_id;
-        order.completed_time = userver::storages::postgres::TimePointWithoutTz{
-            complete_info.complete_time};
+        order.completed_time = complete_info.complete_time;
 
         orders_to_update.push_back(order);
     }
 
-    std::vector<postgres::Order> updated_orders;
+    std::vector<domain::Order> updated_orders;
     try {
         updated_orders = order_repository->UpdateAll(orders_to_update);
     } catch (std::invalid_argument& e) {
@@ -54,8 +52,11 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
     }
 
     std::vector<OrderDto> response_dto;
-    for (auto updated_order : updated_orders)
-        response_dto.push_back(updated_order);
+    for (domain::Order updated_order : updated_orders)
+        response_dto.push_back(
+            {updated_order.id, updated_order.weight, updated_order.regions,
+             updated_order.delivery_hours, updated_order.cost,
+             updated_order.completed_time});
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }

@@ -2,11 +2,11 @@
 #include <userver/server/handlers/http_handler_json_base.hpp>
 #include <userver/storages/postgres/cluster.hpp>
 
-#include "postgres/order_repository.hpp"
+#include "domain/repositories/order_repository.hpp"
 
 namespace lavka {
 class OrdersHandler : public userver::server::handlers::HttpHandlerJsonBase {
-    lavka::postgres::OrderRepositoryPtr order_repository;
+    domain::IOrderRepositoryPtr order_repository;
 
     userver::formats::json::Value GetOrders(
         const userver::server::http::HttpRequest& request) const;
