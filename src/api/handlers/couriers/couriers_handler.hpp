@@ -4,7 +4,7 @@
 
 #include "domain/repositories/courier_repository.hpp"
 
-namespace lavka {
+namespace lavka::api {
 class CouriersHandler : public userver::server::handlers::HttpHandlerJsonBase {
     domain::ICourierRepositoryPtr couriers_repository_ptr;
 
@@ -24,4 +24,4 @@ class CouriersHandler : public userver::server::handlers::HttpHandlerJsonBase {
         const userver::formats::json::Value& request_json,
         userver::server::request::RequestContext& context) const override;
 };
-}  // namespace lavka
+}  // namespace lavka::api

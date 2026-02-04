@@ -13,7 +13,7 @@
 using namespace userver::server;
 using namespace userver::formats;
 
-namespace lavka {
+namespace lavka::api {
 OrdersHandler::OrdersHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
@@ -39,7 +39,7 @@ json::Value OrdersHandler::GetOrders(
     auto [limit, offset] = lavka::utils::ExtractPagination(request);
 
     auto orders = order_repository->GetAll(limit, offset);
-    std::vector<chaotic::openapi::OrderDto> response_dto;
+    std::vector<OrderDto> response_dto;
     for (domain::Order order : orders) {
         response_dto.push_back({order.id, order.weight, order.regions,
                                 order.delivery_hours, order.cost,
@@ -50,9 +50,9 @@ json::Value OrdersHandler::GetOrders(
 }
 
 json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
-    chaotic::openapi::CreateOrderRequest request_dto;
+    CreateOrderRequest request_dto;
     try {
-        request_dto = request_json.As<chaotic::openapi::CreateOrderRequest>();
+        request_dto = request_json.As<CreateOrderRequest>();
     } catch (json::Exception) {
         throw ClientError{};
     }
@@ -68,7 +68,7 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
 
     auto created_orders = order_repository->CreateAll(orders_to_create);
 
-    std::vector<chaotic::openapi::OrderDto> response_dto;
+    std::vector<OrderDto> response_dto;
     for (domain::Order created_order : created_orders)
         response_dto.push_back(
             {created_order.id, created_order.weight, created_order.regions,
@@ -77,4 +77,4 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }
-};  // namespace lavka
+};  // namespace lavka::api

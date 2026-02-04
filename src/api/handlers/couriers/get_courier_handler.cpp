@@ -8,9 +8,8 @@
 
 using namespace userver::formats;
 using namespace userver::server;
-using namespace chaotic::openapi;
 
-namespace lavka {
+namespace lavka::api {
 
 GetCourierHandler::GetCourierHandler(
     const userver::components::ComponentConfig& config,
@@ -39,12 +38,11 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
             throw handlers::ClientError{};
         }
 
-        CourierDto courier_dto{courier.id,
-                               chaotic::openapi::CourierType(courier.type),
+        CourierDto courier_dto{courier.id, CourierType(courier.type),
                                courier.regions, courier.working_hours};
         return json::ValueBuilder{courier_dto}.ExtractValue();
     } else
         throw ClientError{};
 }
 
-}  // namespace lavka
+}  // namespace lavka::api

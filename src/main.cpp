@@ -13,11 +13,11 @@
 
 int main(int argc, char* argv[]) {
     auto component_list = userver::components::MinimalServerComponentList()
-                              .Append<lavka::OrdersHandler>()
-                              .Append<lavka::CouriersHandler>()
-                              .Append<lavka::CompletedOrdersHandler>()
-                              .Append<lavka::GetOrderHandler>()
-                              .Append<lavka::GetCourierHandler>()
+                              .Append<lavka::api::OrdersHandler>()
+                              .Append<lavka::api::CouriersHandler>()
+                              .Append<lavka::api::CompletedOrdersHandler>()
+                              .Append<lavka::api::GetOrderHandler>()
+                              .Append<lavka::api::GetCourierHandler>()
                               .Append<userver::components::TestsuiteSupport>()
                               .Append<userver::components::Postgres>("lavka-db")
                               .Append<userver::clients::dns::Component>()

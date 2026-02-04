@@ -8,9 +8,8 @@
 
 using namespace userver::formats;
 using namespace userver::server;
-using namespace chaotic::openapi;
 
-namespace lavka {
+namespace lavka::api {
 CompletedOrdersHandler::CompletedOrdersHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
@@ -60,4 +59,4 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }
-}  // namespace lavka
+}  // namespace lavka::api

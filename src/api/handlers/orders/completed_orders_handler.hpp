@@ -3,7 +3,7 @@
 
 #include "domain/repositories/order_repository.hpp"
 
-namespace lavka {
+namespace lavka::api {
 class CompletedOrdersHandler
     : public userver::server::handlers::HttpHandlerJsonBase {
     domain::IOrderRepositoryPtr order_repository;
@@ -20,4 +20,4 @@ class CompletedOrdersHandler
         const userver::formats::json::Value& request_json,
         userver::server::request::RequestContext& context) const override;
 };
-}  // namespace lavka
+}  // namespace lavka::api

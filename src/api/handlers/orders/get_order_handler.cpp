@@ -8,7 +8,7 @@
 using namespace userver::formats;
 using namespace userver::server;
 
-namespace lavka {
+namespace lavka::api {
 GetOrderHandler::GetOrderHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
@@ -35,10 +35,10 @@ json::Value GetOrderHandler::HandleRequestJsonThrow(
     } catch (std::invalid_argument& e) {
         throw handlers::ClientError{};
     }
-    chaotic::openapi::OrderDto response_dto{
-        order.id,   order.weight,        order.regions, order.delivery_hours,
-        order.cost, order.completed_time};
+    OrderDto response_dto{order.id,      order.weight,
+                          order.regions, order.delivery_hours,
+                          order.cost,    order.completed_time};
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }
-}  // namespace lavka
+}  // namespace lavka::api
