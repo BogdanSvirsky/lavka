@@ -4,7 +4,8 @@
 #include <userver/components/component_context.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 
-#include "infrastructure/repository_manager.hpp"
+#include "api/utils.hpp"
+#include "infra/repository_manager.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
@@ -52,10 +53,7 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
 
     std::vector<OrderDto> response_dto;
     for (domain::Order updated_order : updated_orders)
-        response_dto.push_back(
-            {updated_order.id, updated_order.weight, updated_order.regions,
-             updated_order.delivery_hours, updated_order.cost,
-             updated_order.completed_time});
+        response_dto.push_back(utils::ToDto(updated_order));
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }

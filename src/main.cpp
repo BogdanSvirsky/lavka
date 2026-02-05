@@ -9,7 +9,7 @@
 #include "api/handlers/orders/completed_orders_handler.hpp"
 #include "api/handlers/orders/get_order_handler.hpp"
 #include "api/handlers/orders/orders_handler.hpp"
-#include "infrastructure/repository_manager.hpp"
+#include "infra/repository_manager.hpp"
 
 int main(int argc, char* argv[]) {
     auto component_list = userver::components::MinimalServerComponentList()

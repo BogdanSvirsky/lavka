@@ -6,9 +6,9 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/storages/postgres/component.hpp>
 
-#include "infrastructure/repository_manager.hpp"
+#include "api/utils.hpp"
+#include "infra/repository_manager.hpp"
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::server;
 using namespace userver::formats;
@@ -36,14 +36,12 @@ json::Value OrdersHandler::HandleRequestJsonThrow(
 
 json::Value OrdersHandler::GetOrders(
     const userver::server::http::HttpRequest& request) const {
-    auto [limit, offset] = lavka::utils::ExtractPagination(request);
+    auto [limit, offset] = utils::ExtractPagination(request);
 
     auto orders = order_repository->GetAll(limit, offset);
     std::vector<OrderDto> response_dto;
     for (domain::Order order : orders) {
-        response_dto.push_back({order.id, order.weight, order.regions,
-                                order.delivery_hours, order.cost,
-                                order.completed_time});
+        response_dto.push_back(utils::ToDto(order));
     }
 
     return json::ValueBuilder{response_dto}.ExtractValue();
@@ -70,10 +68,7 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
 
     std::vector<OrderDto> response_dto;
     for (domain::Order created_order : created_orders)
-        response_dto.push_back(
-            {created_order.id, created_order.weight, created_order.regions,
-             created_order.delivery_hours, created_order.cost,
-             created_order.completed_time});
+        response_dto.push_back(utils::ToDto(created_order));
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }

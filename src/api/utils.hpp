@@ -4,9 +4,14 @@
 #include <userver/utils/trivial_map.hpp>
 #include <utility>
 
-namespace lavka::utils {
+#include "domain/entities/order.hpp"
+#include "schemas/openapi.hpp"
+
+namespace lavka::api::utils {
 // Extracts 'limit' and 'offset' query parameterss from request.
 // If they are invalid, throws ClientError
 std::pair<int, int> ExtractPagination(
     const userver::server::http::HttpRequest& request);
-}  // namespace lavka::utils
+
+OrderDto ToDto(const domain::Order& order);
+}  // namespace lavka::api::utils

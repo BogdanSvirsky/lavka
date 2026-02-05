@@ -1,5 +1,6 @@
 #include "order_repository.hpp"
 
+#include "infra/postgres/utils.hpp"
 #include "order.hpp"
 
 using namespace userver::storages::postgres;
@@ -15,7 +16,7 @@ domain::Order OrderRepository::GetById(std::int64_t id) {
 
     if (res.IsEmpty()) throw std::invalid_argument{"Bad order id!"};
 
-    return res.AsSingleRow<Order>(kRowTag);
+    return utils::ToDomain(res.AsSingleRow<Order>(kRowTag));
 }
 
 std::vector<domain::Order> OrderRepository::GetAll(int limit, int offset) {
@@ -30,7 +31,8 @@ std::vector<domain::Order> OrderRepository::GetAll(int limit, int offset) {
                                  .AsSetOf<Order>(kRowTag);
 
     std::vector<domain::Order> result_vector;
-    for (Order order : orders_result_set) result_vector.push_back(order);
+    for (Order order : orders_result_set)
+        result_vector.push_back(utils::ToDomain(order));
     return result_vector;
 }
 
@@ -53,7 +55,8 @@ std::vector<domain::Order> OrderRepository::CreateAll(
             throw std::invalid_argument{"Mistake in orders to create!"};
         }
 
-        created_orders.push_back(result_set.AsSingleRow<Order>(kRowTag));
+        created_orders.push_back(
+            utils::ToDomain(result_set.AsSingleRow<Order>(kRowTag)));
     }
     tr.Commit();
 
@@ -68,11 +71,6 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
         pg_cluster_->Begin("orders_completion_transaction",
                            ClusterHostType::kMaster, Transaction::RW);
     for (auto order_to_update : orders_to_update) {
-        std::optional<TimePointWithoutTz> completed_time =
-            order_to_update.completed_time.has_value()
-                ? std::optional<TimePointWithoutTz>{order_to_update
-                                                        .completed_time.value()}
-                : std::nullopt;
         auto result_set = tr.Execute(
             "UPDATE lavka.orders "
             "SET weight = $2, regions = $3, delivery_hours = $4, cost = "
@@ -82,14 +80,16 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
             "RETURNING *",
             order_to_update.id, order_to_update.weight, order_to_update.regions,
             order_to_update.delivery_hours, order_to_update.cost,
-            order_to_update.completed_courier_id, completed_time);
+            order_to_update.completed_courier_id,
+            utils::Convert(order_to_update.completed_time));
 
         if (result_set.RowsAffected() != 1) {
             tr.Rollback();
             throw std::invalid_argument{"Mistake in orders to update!"};
         }
 
-        updated_orders.push_back(result_set.AsSingleRow<Order>(kRowTag));
+        updated_orders.push_back(
+            utils::ToDomain(result_set.AsSingleRow<Order>(kRowTag)));
     }
     tr.Commit();
 

@@ -3,9 +3,9 @@
 #include <userver/components/component.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
-#include "infrastructure/repository_manager.hpp"
+#include "api/utils.hpp"
+#include "infra/repository_manager.hpp"
 #include "schemas/openapi.hpp"
-#include "utils.hpp"
 
 using namespace userver::server;
 using namespace userver::formats;
@@ -33,7 +33,7 @@ json::Value CouriersHandler::HandleRequestJsonThrow(
 
 json::Value CouriersHandler::GetCouriers(
     const userver::server::http::HttpRequest& request) const {
-    auto [limit, offset] = lavka::utils::ExtractPagination(request);
+    auto [limit, offset] = utils::ExtractPagination(request);
 
     LOG_DEBUG() << limit << " " << offset;
 

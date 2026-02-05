@@ -3,7 +3,7 @@
 #include <userver/logging/log.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
-namespace lavka::utils {
+namespace lavka::api::utils {
 std::pair<int, int> ExtractPagination(
     const userver::server::http::HttpRequest& request) {
     int limit = 0, offset = -1;
@@ -26,4 +26,10 @@ std::pair<int, int> ExtractPagination(
     if (limit < 1 || offset < 0) throw userver::server::handlers::ClientError();
     return {limit, offset};
 }
-}  // namespace lavka::utils
+
+OrderDto ToDto(const domain::Order& order) {
+    return {order.id,      order.weight,
+            order.regions, order.delivery_hours,
+            order.cost,    order.completed_time};
+}
+}  // namespace lavka::api::utils

@@ -2,7 +2,8 @@
 
 #include <userver/components/component_context.hpp>
 
-#include "infrastructure/repository_manager.hpp"
+#include "api/utils.hpp"
+#include "infra/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::formats;
@@ -35,9 +36,7 @@ json::Value GetOrderHandler::HandleRequestJsonThrow(
     } catch (std::invalid_argument& e) {
         throw handlers::ClientError{};
     }
-    OrderDto response_dto{order.id,      order.weight,
-                          order.regions, order.delivery_hours,
-                          order.cost,    order.completed_time};
+    OrderDto response_dto = utils::ToDto(order);
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }
