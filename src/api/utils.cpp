@@ -1,5 +1,6 @@
 #include "utils.hpp"
 
+#include <optional>
 #include <userver/logging/log.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
@@ -28,8 +29,14 @@ std::pair<int, int> ExtractPagination(
 }
 
 OrderDto ToDto(const domain::Order& order) {
-    return {order.id,      order.weight,
-            order.regions, order.delivery_hours,
-            order.cost,    order.completed_time};
+    return {order.id,
+            order.weight,
+            order.regions,
+            order.delivery_hours,
+            order.cost,
+            order.completed_time,
+            order.rating.has_value()
+                ? std::optional<Rating>{Rating(order.rating.value())}
+                : std::nullopt};
 }
 }  // namespace lavka::api::utils

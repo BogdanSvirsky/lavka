@@ -279,6 +279,9 @@ components:
         completed_time:
           type: string
           format: date-time
+        rating:
+          $ref: '#/components/schemas/Rating'
+
     GroupOrders:
       required:
         - group_order_id
@@ -315,6 +318,8 @@ components:
         complete_time:
           type: string
           format: date-time
+        rating:
+          $ref: '#/components/schemas/Rating'
 
     CompleteOrderRequestDto:
       required:
@@ -422,3 +427,12 @@ components:
         - FOOT
         - BIKE
         - AUTO
+    
+    Rating:
+      type: integer
+      enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5

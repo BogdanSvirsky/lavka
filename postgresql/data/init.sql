@@ -5,14 +5,14 @@ INSERT INTO lavka.couriers (type, regions, working_hours) VALUES
 ('FOOT', '{3, 4}', '{"14:00-22:00"}'),
 ('BIKE', '{1, 2, 5}', '{"09:00-13:00", "17:00-21:00"}');
 
-INSERT INTO lavka.orders (weight, regions, delivery_hours, cost, completed_courier_id, completed_time) VALUES
-(5.5, 1, '{"10:00-12:00", "14:00-16:00"}', 500, NULL, NULL),
-(12.3, 2, '{"11:00-14:00"}', 800, 2, '2024-01-15 12:30:00'),
-(2.1, 3, '{"09:00-18:00"}', 300, NULL, NULL),
-(8.7, 4, '{"13:00-17:00"}', 600, NULL, NULL),
-(15.0, 5, '{"10:00-12:00", "16:00-19:00"}', 1000, NULL, NULL),
-(3.2, 1, '{"12:00-15:00"}', 350, 1, '2024-01-16 14:20:00'),
-(7.8, 2, '{"15:00-20:00"}', 700, NULL, NULL),
-(9.5, 3, '{"14:00-22:00"}', 750, NULL, NULL),
-(1.5, 4, '{"09:00-12:00"}', 250, NULL, NULL),
-(11.2, 5, '{"17:00-21:00"}', 900, NULL, NULL);
+INSERT INTO lavka.orders (weight, regions, delivery_hours, cost, completed_courier_id, completed_time, rating) VALUES
+(5.5, 1, '{"10:00-12:00", "14:00-16:00"}', 500, NULL, NULL, NULL),
+(12.3, 2, '{"11:00-14:00"}', 800, 2, '2024-01-15 12:30:00', NULL),
+(2.1, 3, '{"09:00-18:00"}', 300, NULL, NULL, NULL),
+(8.7, 4, '{"13:00-17:00"}', 600, NULL, NULL, NULL),
+(15.0, 5, '{"10:00-12:00", "16:00-19:00"}', 1000, NULL, NULL, NULL),
+(3.2, 1, '{"12:00-15:00"}', 350, 1, '2024-01-16 14:20:00', '4'),
+(7.8, 2, '{"15:00-20:00"}', 700, NULL, NULL, NULL),
+(9.5, 3, '{"14:00-22:00"}', 750, NULL, NULL, NULL),
+(1.5, 4, '{"09:00-12:00"}', 250, NULL, NULL, NULL),
+(11.2, 5, '{"17:00-21:00"}', 900, NULL, NULL, NULL);

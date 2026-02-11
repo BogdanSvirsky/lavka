@@ -2,6 +2,7 @@ import pytest
 
 from test_couriers_handler import format_hours
 from datetime import datetime, timezone
+from dateutil import parser
 
 
 def compare_datetime(a: datetime, b: datetime):
@@ -9,20 +10,28 @@ def compare_datetime(a: datetime, b: datetime):
 
 
 @pytest.mark.pgsql("lavka", files=["init.sql"])
-async def test_get_orders(service_client, pgsql):
+async def test_get(service_client, pgsql):
     def check_orders(orders_json, cursor):
         for order_json in orders_json:
-            cursor.execute("""
-                    SELECT id, completed_time FROM lavka.orders
-                    WHERE id = {} AND weight = {} AND regions = {} AND delivery_hours = {} AND cost = {};
-                    """.format(str(order_json['order_id']), order_json['weight'], order_json['regions'],
-                               format_hours(
-                                   order_json['delivery_hours']), order_json['cost']))
-            res = cursor.fetchall()
-            assert len(res) == 1
-            if 'completed_time' in order_json.keys():
-                assert compare_datetime(datetime.fromisoformat(
-                    order_json["completed_time"]), res[0][1])
+            cursor.execute(
+                "SELECT * FROM lavka.orders WHERE id = {};".format(str(order_json["order_id"])))
+            res = cursor.fetchone()
+
+            # may not be equivalent due to inaccuracy
+            assert res[1] == order_json['weight']
+            assert res[2] == order_json['regions']
+            assert res[3] == order_json['delivery_hours']
+            assert res[4] == order_json['cost']
+            if res[7] is not None:
+                assert res[5] is not None
+                assert compare_datetime(parser.isoparse(
+                    order_json["completed_time"]), res[7])
+                if res[6] is not None:
+                    assert res[6] == str(order_json["rating"])
+                else:
+                    assert "rating" not in order_json.keys()
+            else:
+                assert res[5] is None and "completed_time" not in order_json.keys()
 
     # all presented
     response = await service_client.get('/orders?limit=10')
@@ -44,7 +53,8 @@ async def test_get_orders(service_client, pgsql):
     cursor = pgsql['lavka'].cursor()
     check_orders(data, cursor)
 
-    # bad request
+
+async def test_bad_get_request(service_client):
     response = await service_client.get('/orders?limit=-1')
     assert response.status == 400
     response = await service_client.get('/orders?offset=-1')
@@ -54,7 +64,7 @@ async def test_get_orders(service_client, pgsql):
     assert len(response.json()) == 0
 
 
-async def test_post_orders(service_client, pgsql):
+async def test_creation(service_client, pgsql):
     # correct request test
     request_body = {
         "orders": [
@@ -94,6 +104,8 @@ async def test_post_orders(service_client, pgsql):
         order_json["order_id"] = res[0][0]
         assert order_json in response_body
 
+
+async def test_bad_create_request(service_client):
     # empty request test
     response = await service_client.post("/orders")
     assert response.status_code == 400

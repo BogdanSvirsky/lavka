@@ -58,7 +58,7 @@ json::Value OrdersHandler::PostOrders(const json::Value& request_json) const {
     std::vector<domain::Order> orders_to_create;
     for (auto create_order_dto : request_dto.orders)
         orders_to_create.push_back({
-            .weight = static_cast<float>(create_order_dto.weight),
+            .weight = create_order_dto.weight,
             .regions = create_order_dto.regions,
             .delivery_hours = create_order_dto.delivery_hours,
             .cost = create_order_dto.cost,

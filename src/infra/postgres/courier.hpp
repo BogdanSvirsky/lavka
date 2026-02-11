@@ -17,7 +17,7 @@ struct Courier {
 
     operator domain::Courier() const {
         return {id, domain::Courier::Type(type), regions, working_hours};
-    }
+    }  // TODO: make explicit
 };
 }  // namespace lavka::postgres
 
