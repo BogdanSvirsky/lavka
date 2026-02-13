@@ -4,8 +4,6 @@
 #include <userver/utils/trivial_map.hpp>
 #include <vector>
 
-#include "domain/entities/courier.hpp"
-
 namespace lavka::postgres {
 struct Courier {
     enum Type { kFoot, kBike, kAuto };
@@ -14,10 +12,7 @@ struct Courier {
     Type type;
     std::vector<std::int32_t> regions;
     std::vector<std::string> working_hours;
-
-    operator domain::Courier() const {
-        return {id, domain::Courier::Type(type), regions, working_hours};
-    }  // TODO: make explicit
+    std::optional<double> rating{};
 };
 }  // namespace lavka::postgres
 

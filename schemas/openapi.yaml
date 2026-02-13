@@ -227,7 +227,7 @@ components:
       properties:
         weight:
           type: number
-          format: float
+          format: double
         regions:
           type: integer
           format: int32
@@ -386,6 +386,9 @@ components:
           type: array
           items:
             type: string
+        rating:
+          type: number
+          format: double
 
     CreateCouriersResponse:
       required:

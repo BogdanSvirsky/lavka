@@ -3,8 +3,8 @@
 #include <userver/components/component.hpp>
 #include <userver/storages/postgres/component.hpp>
 
-#include "postgres/courier_repository.hpp"
-#include "postgres/order_repository.hpp"
+#include "postgres/repositories/courier_repository.hpp"
+#include "postgres/repositories/order_repository.hpp"
 
 namespace lavka {
 RepositoryManager::RepositoryManager(

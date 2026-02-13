@@ -5,19 +5,25 @@ def format_hours(hours: list[str]) -> str:
     return "'{\"" + "\",\"".join(hours) + "\"}'"
 
 
+def validate_courier_json(courier_json: dict, courier_row):
+    assert courier_json["courier_id"] == courier_row[0]
+    assert courier_json["courier_type"] == courier_row[1]
+    assert courier_json["regions"] == courier_row[2]
+    assert courier_json["working_hours"] == courier_row[3]
+    if courier_row[4] is not None:
+        assert courier_row[4] == courier_json["rating"]
+    else:
+        assert "rating" not in courier_json.keys()
+
+
 @pytest.mark.pgsql("lavka", files=["init.sql"])
 async def test_get_couriers(service_client, pgsql):
     def check_couriers(couriers_json, cursor):
         for courier_json in couriers_json:
-            cursor.execute("""
-                    SELECT id FROM lavka.couriers
-                    WHERE id = {} AND type = '{}' AND regions = '{}' AND working_hours = {};
-                    """.format(str(courier_json['courier_id']), courier_json['courier_type'],
-                               "{" + ", ".join(str(x)
-                                               for x in courier_json['regions']) + "}",
-                               format_hours(courier_json['working_hours'])))
-            res = cursor.fetchall()
-            assert len(res) == 1
+            cursor.execute(
+                "SELECT * FROM lavka.couriers WHERE id = {};".format(str(courier_json["courier_id"])))
+            res = cursor.fetchone()
+            validate_courier_json(courier_json, res)
 
     # all presented
     response = await service_client.get('/couriers?limit=5')
@@ -40,16 +46,18 @@ async def test_get_couriers(service_client, pgsql):
     assert data['offset'] == 2
     assert len(data['couriers']) == 3
 
-    cursor = pgsql['lavka'].cursor()
     check_couriers(data['couriers'], cursor)
 
+    response = await service_client.get('/couriers?offset=123')
+    assert response.status == 200
+    assert len(response.json()['couriers']) == 0
+
+
+async def test_bad_get_request(service_client):
     response = await service_client.get('/couriers?limit=-1')
     assert response.status == 400
     response = await service_client.get('/couriers?offset=-1')
     assert response.status == 400
-    response = await service_client.get('/couriers?offset=123')
-    assert response.status == 200
-    assert len(response.json()['couriers']) == 0
 
 
 async def test_post_couriers(service_client, pgsql):

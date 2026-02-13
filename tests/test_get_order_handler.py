@@ -9,8 +9,7 @@ async def test_get_order(service_client, pgsql):
     cursor = pgsql['lavka'].cursor()
 
     cursor.execute(
-        "SELECT id, weight, regions, delivery_hours, cost FROM lavka.orders "
-        "WHERE completed_time IS NULL LIMIT 1;")
+        "SELECT * FROM lavka.orders WHERE completed_time IS NULL LIMIT 1;")
     order = cursor.fetchone()
     response = await service_client.get("/orders/" + str(order[0]))
     assert response.status_code == 200

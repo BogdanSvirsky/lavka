@@ -1,5 +1,7 @@
 import pytest
 
+from test_couriers_handler import validate_courier_json
+
 
 @pytest.mark.pgsql("lavka", files=["init.sql"])
 async def test_get_courier(service_client, pgsql):
@@ -11,12 +13,7 @@ async def test_get_courier(service_client, pgsql):
 
     response = await service_client.get("/couriers/" + str(res[0]))
     assert response.status_code == 200
-    assert response.json() == {
-        "courier_id": res[0],
-        "courier_type": res[1],
-        "regions": res[2],
-        "working_hours": res[3]
-    }
+    validate_courier_json(response.json(), res)
 
     cursor.execute(
         "SELECT * FROM lavka.couriers LIMIT 1 OFFSET 3;")
@@ -24,18 +21,9 @@ async def test_get_courier(service_client, pgsql):
 
     response = await service_client.get("/couriers/" + str(res[0]))
     assert response.status_code == 200
-    assert response.json() == {
-        "courier_id": res[0],
-        "courier_type": res[1],
-        "regions": res[2],
-        "working_hours": res[3]
-    }
+    validate_courier_json(response.json(), res)
 
-    # invalid id
-    id = 5252
-    cursor.execute(
-        f"SELECT * FROM lavka.couriers WHERE id = {id};")
-    assert cursor.rowcount == 0
 
-    response = await service_client.get("/couriers/" + str(id))
+async def test_invalid_id(service_client):
+    response = await service_client.get("/couriers/525252")
     assert response.status_code == 400

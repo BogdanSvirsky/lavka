@@ -2,7 +2,8 @@
 
 #include <stdexcept>
 
-#include "courier.hpp"
+#include "infra/postgres/models/courier.hpp"
+#include "infra/postgres/utils.hpp"
 
 using namespace userver::storages::postgres;
 
@@ -20,8 +21,7 @@ std::vector<domain::Courier> CourierRepository::CreateAll(
     for (auto& courier_request : couriers_to_create) {
         auto res = tr.Execute(
             "INSERT INTO lavka.couriers (type, regions, working_hours) "
-            "VALUES ($1, $2, $3)"
-            "RETURNING id, type, regions, working_hours",
+            "VALUES ($1, $2, $3) RETURNING *",
             Courier::Type(courier_request.type), courier_request.regions,
             courier_request.working_hours);
 
@@ -30,7 +30,8 @@ std::vector<domain::Courier> CourierRepository::CreateAll(
             throw std::invalid_argument{"Mistake in CreateCouriersRequest!"};
         }
 
-        domain::Courier created_courier = res.AsSingleRow<Courier>(kRowTag);
+        domain::Courier created_courier =
+            utils::ToDomain(res.AsSingleRow<Courier>(kRowTag));
 
         created_couriers.push_back(created_courier);
     }
@@ -45,28 +46,27 @@ std::vector<domain::Courier> CourierRepository::GetAll(int limit, int offset) {
 
     auto result_set = pg_cluster_->Execute(
         ClusterHostType::kSlave,
-        "SELECT id, type, regions, working_hours FROM lavka.couriers\n"
-        "ORDER BY id LIMIT $1 OFFSET $2;",
-        limit, offset);
+        "SELECT * FROM lavka.couriers ORDER BY id LIMIT $1 OFFSET $2;", limit,
+        offset);
 
     std::vector<domain::Courier> couriers;
     for (Courier courier : result_set.AsSetOf<Courier>(kRowTag))
-        couriers.push_back(courier);
+        couriers.push_back(utils::ToDomain(courier));
 
     return couriers;
 }
 
 domain::Courier CourierRepository::GetById(std::int64_t id) {
-    auto res = pg_cluster_->Execute(
-        ClusterHostType::kSlave,
-        "SELECT id, type, regions, working_hours FROM lavka.couriers "
-        "WHERE id = $1;",
-        id);
+    auto res =
+        pg_cluster_->Execute(ClusterHostType::kSlave,
+                             "SELECT * FROM lavka.couriers WHERE id = $1;", id);
 
     if (res.IsEmpty()) {
         throw std::invalid_argument{"Bad id!"};
     }
 
-    return res.AsSingleRow<Courier>(kRowTag);
+    Courier postgres_courier = res.AsSingleRow<Courier>(kRowTag);
+
+    return utils::ToDomain(postgres_courier);
 }
 }  // namespace lavka::postgres

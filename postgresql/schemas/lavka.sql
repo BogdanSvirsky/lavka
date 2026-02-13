@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS lavka.couriers (
     id BIGSERIAL PRIMARY KEY,
     type lavka.courier_type NOT NULL,
     regions integer[] NOT NULL,
-    working_hours VARCHAR(11)[] NOT NULL
+    working_hours VARCHAR(11)[] NOT NULL,
+    rating DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS lavka.orders (
@@ -19,4 +20,4 @@ CREATE TABLE IF NOT EXISTS lavka.orders (
     completed_courier_id BIGINT REFERENCES lavka.couriers(id) DEFAULT null,
     rating lavka.rating,
     completed_time TIMESTAMP
-);
+);  

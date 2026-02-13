@@ -39,4 +39,11 @@ OrderDto ToDto(const domain::Order& order) {
                 ? std::optional<Rating>{Rating(order.rating.value())}
                 : std::nullopt};
 }
+
+CourierDto ToDto(const domain::Courier& courier) {
+    return {courier.id, CourierType(courier.type), courier.regions,
+            courier.working_hours,
+            courier.rating.has_value() ? std::optional<double>{*courier.rating}
+                                       : std::nullopt};
+}
 }  // namespace lavka::api::utils

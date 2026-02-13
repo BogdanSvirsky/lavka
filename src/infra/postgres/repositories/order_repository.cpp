@@ -1,7 +1,7 @@
 #include "order_repository.hpp"
 
-#include "order.hpp"
-#include "utils.hpp"
+#include "infra/postgres/models/order.hpp"
+#include "infra/postgres/utils.hpp"
 
 using namespace userver::storages::postgres;
 

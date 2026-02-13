@@ -1,9 +1,9 @@
-INSERT INTO lavka.couriers (type, regions, working_hours) VALUES
-('FOOT', '{1, 2, 3}', '{"09:00-12:00", "13:00-18:00"}'),
-('BIKE', '{2, 4, 5}', '{"10:00-14:00", "15:00-20:00"}'),
-('AUTO', '{1, 3, 5}', '{"08:00-20:00"}'),
-('FOOT', '{3, 4}', '{"14:00-22:00"}'),
-('BIKE', '{1, 2, 5}', '{"09:00-13:00", "17:00-21:00"}');
+INSERT INTO lavka.couriers (type, regions, working_hours, rating) VALUES
+('FOOT', '{1, 2, 3}', '{"09:00-12:00", "13:00-18:00"}', 4.89),
+('BIKE', '{2, 4, 5}', '{"10:00-14:00", "15:00-20:00"}', 3.333333),
+('AUTO', '{1, 3, 5}', '{"08:00-20:00"}', NULL),
+('FOOT', '{3, 4}', '{"14:00-22:00"}', 1.73460877),
+('BIKE', '{1, 2, 5}', '{"09:00-13:00", "17:00-21:00"}', 2.694838275);
 
 INSERT INTO lavka.orders (weight, regions, delivery_hours, cost, completed_courier_id, completed_time, rating) VALUES
 (5.5, 1, '{"10:00-12:00", "14:00-16:00"}', 500, NULL, NULL, NULL),

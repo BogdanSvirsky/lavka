@@ -41,9 +41,8 @@ json::Value CouriersHandler::GetCouriers(
 
     GetCouriersResponse response_dto{.limit = limit, .offset = offset};
     for (auto courier : couriers) {
-        response_dto.couriers.push_back({courier.id, CourierType(courier.type),
-                                         courier.regions,
-                                         courier.working_hours});
+        LOG_DEBUG() << "RATING: " << courier.rating;
+        response_dto.couriers.push_back(utils::ToDto(courier));
     }
 
     return json::ValueBuilder{response_dto}.ExtractValue();
@@ -80,9 +79,7 @@ json::Value CouriersHandler::PostCouriers(
 
     CreateCouriersResponse response_dto;
     for (auto& created_courier : created_couriers)
-        response_dto.couriers.push_back(
-            {created_courier.id, CourierType(created_courier.type),
-             created_courier.regions, created_courier.working_hours});
+        response_dto.couriers.push_back(utils::ToDto(created_courier));
 
     return json::ValueBuilder{response_dto}.ExtractValue();
 }

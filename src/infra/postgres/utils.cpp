@@ -12,6 +12,14 @@ domain::Order ToDomain(const Order& postgres_order) {
             Convert(postgres_order.rating)};
 }
 
+domain::Courier ToDomain(const Courier& postgres_order) {
+    return {postgres_order.id, domain::Courier::Type(postgres_order.type),
+            postgres_order.regions, postgres_order.working_hours,
+            postgres_order.rating.has_value()
+                ? std::optional<double>{*postgres_order.rating}
+                : std::nullopt};
+}
+
 std::optional<userver::utils::datetime::TimePointTz> Convert(
     std::optional<userver::storages::postgres::TimePointWithoutTz> time_point) {
     return time_point.has_value()

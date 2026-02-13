@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -11,5 +12,6 @@ struct Courier {
     Type type;
     std::vector<std::int32_t> regions;
     std::vector<std::string> working_hours;
+    std::optional<double> rating{};
 };
 }  // namespace lavka::domain
