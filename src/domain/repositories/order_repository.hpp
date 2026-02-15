@@ -19,6 +19,11 @@ class IOrderRepository {
     // Throws an std::invalid_argument when can't update one of the orders
     virtual std::vector<Order> UpdateAll(
         std::vector<Order> orders_to_update) = 0;
+
+    // Get ratings of the last orders that were complited by courier with id
+    // `courier_id` sorted in new to old order
+    virtual std::vector<Order::Rating> GetLastRatings(std::int64_t courier_id,
+                                                      int limit) = 0;
 };
 
 using IOrderRepositoryPtr = std::shared_ptr<IOrderRepository>;

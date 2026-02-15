@@ -19,5 +19,9 @@ class CourierRepository final : public lavka::domain::ICourierRepository {
 
     // Throws an std::invalid_argument when can't find courier
     domain::Courier GetById(std::int64_t id) override;
+
+    void UpdateRatings(
+        const std::vector<std::tuple<domain::Courier::Id,
+                                     domain::Courier::Rating>>&) override;
 };
 }  // namespace lavka::postgres

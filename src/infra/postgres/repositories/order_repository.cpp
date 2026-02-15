@@ -97,4 +97,7 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
 
     return updated_orders;
 }
+
+std::vector<domain::Order::Rating> OrderRepository::GetLastRatings(
+    std::int64_t courier_id, int limit) {}
 }  // namespace lavka::postgres

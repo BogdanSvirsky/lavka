@@ -15,6 +15,10 @@ class ICourierRepository {
 
     // Throws an std::invalid_argument when can't find courier
     virtual Courier GetById(std::int64_t id) = 0;
+
+    // Throws an std::invalid_argument
+    virtual void UpdateRatings(
+        const std::vector<std::tuple<Courier::Id, Courier::Rating>>&) = 0;
 };
 
 using ICourierRepositoryPtr = std::shared_ptr<ICourierRepository>;

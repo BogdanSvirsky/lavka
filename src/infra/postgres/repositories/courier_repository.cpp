@@ -69,4 +69,8 @@ domain::Courier CourierRepository::GetById(std::int64_t id) {
 
     return utils::ToDomain(postgres_courier);
 }
+
+void CourierRepository::UpdateRatings(
+    const std::vector<
+        std::tuple<domain::Courier::Id, domain::Courier::Rating>>&) {}
 }  // namespace lavka::postgres
