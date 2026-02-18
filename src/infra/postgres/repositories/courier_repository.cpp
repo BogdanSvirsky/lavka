@@ -71,6 +71,18 @@ domain::Courier CourierRepository::GetById(std::int64_t id) {
 }
 
 void CourierRepository::UpdateRatings(
-    const std::vector<
-        std::tuple<domain::Courier::Id, domain::Courier::Rating>>&) {}
+    const std::vector<std::tuple<domain::Courier::Id, domain::Courier::Rating>>&
+        ratings_to_update) {
+    auto tr = pg_cluster_->Begin("courier-ratings-update",
+                                 ClusterHostType::kMaster, Transaction::RW);
+    for (auto [id, rating] : ratings_to_update) {
+        auto res = tr.Execute(
+            "UPDATE lavka.couriers SET rating = $1 WHERE id = $2 ", rating, id);
+        if (res.RowsAffected() != 1) {
+            tr.Rollback();
+            throw std::invalid_argument{"Mistake in ratings to update!"};
+        }
+    }
+    tr.Commit();
+}
 }  // namespace lavka::postgres

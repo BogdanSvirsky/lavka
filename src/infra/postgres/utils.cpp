@@ -12,11 +12,11 @@ domain::Order ToDomain(const Order& postgres_order) {
             Convert(postgres_order.rating)};
 }
 
-domain::Courier ToDomain(const Courier& postgres_order) {
-    return {postgres_order.id, domain::Courier::Type(postgres_order.type),
-            postgres_order.regions, postgres_order.working_hours,
-            postgres_order.rating.has_value()
-                ? std::optional<double>{*postgres_order.rating}
+domain::Courier ToDomain(const Courier& postgres_courier) {
+    return {postgres_courier.id, domain::Courier::Type(postgres_courier.type),
+            postgres_courier.regions, postgres_courier.working_hours,
+            postgres_courier.rating.has_value()
+                ? std::optional<double>{*postgres_courier.rating}
                 : std::nullopt};
 }
 

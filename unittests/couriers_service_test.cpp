@@ -4,33 +4,11 @@
 
 #include "domain/entities/order.hpp"
 #include "domain/services/courier_service.hpp"
+#include "mocked_courier_repo.hpp"
+#include "mocked_order_repo.hpp"
 
 using namespace lavka::domain;
 using namespace ::testing;
-
-class MockedOrderRepository final : public IOrderRepository {
-   public:
-    MOCK_METHOD(Order, GetById, (std::int64_t), (override));
-    MOCK_METHOD(std::vector<Order>, GetAll, (int, int), (override));
-    MOCK_METHOD(std::vector<Order>, CreateAll, (std::vector<Order>),
-                (override));
-    MOCK_METHOD(std::vector<Order>, UpdateAll, (std::vector<Order>),
-                (override));
-    MOCK_METHOD(std::vector<Order::Rating>, GetLastRatings,
-                (std::int64_t id, int limit), (override));
-};
-
-class MockedCourierRepository final : public ICourierRepository {
-   public:
-    MOCK_METHOD(std::vector<Courier>, GetAll, (int, int), (override));
-    MOCK_METHOD(std::vector<Courier>, CreateAll, (std::vector<Courier>),
-                (override));
-    MOCK_METHOD(Courier, GetById, (std::int64_t), (override));
-    MOCK_METHOD(
-        void, UpdateRatings,
-        ((const std::vector<std::tuple<Courier::Id, Courier::Rating>>&)),
-        (override));
-};
 
 UTEST(CourierService, CalculateRating) {
     auto order_repo = std::make_shared<MockedOrderRepository>();
@@ -105,5 +83,6 @@ UTEST(CourierService, UpdateRatings) {
     EXPECT_EQ(std::get<1>(updated_ratings1[1]), 4);
 
     EXPECT_TRUE(updated_ratings2.size() == 1);
-    EXPECT_TRUE((*std::get<1>(updated_ratings2[0]) - 2.818181818181) < 1e-8);
+    EXPECT_TRUE(std::abs(*std::get<1>(updated_ratings2[0]) - 2.818181818181) <
+                1e-8);
 }

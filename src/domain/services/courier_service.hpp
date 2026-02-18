@@ -26,4 +26,6 @@ class CourierService {
 
     void UpdateRatings();
 };
+
+using CourierServicePtr = std::shared_ptr<CourierService>;
 }  // namespace lavka::domain

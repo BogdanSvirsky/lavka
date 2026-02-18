@@ -47,8 +47,8 @@ async def test_get(service_client, pgsql):
     response = await service_client.get('/orders?limit=10&offset=3')
     assert response.status == 200
 
-    data = response.json()
-    assert len(data) == 7
+    cursor.execute("SELECT COUNT(*) FROM lavka.orders")
+    assert len(response.json()) == min(cursor.fetchone()[0] - 3, 10)
 
     cursor = pgsql['lavka'].cursor()
     check_orders(data, cursor)

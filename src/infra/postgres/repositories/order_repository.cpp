@@ -99,5 +99,19 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
 }
 
 std::vector<domain::Order::Rating> OrderRepository::GetLastRatings(
-    std::int64_t courier_id, int limit) {}
+    std::int64_t courier_id, int limit) {
+    auto result_set = pg_cluster_->Execute(
+        ClusterHostType::kSlave,
+        "SELECT rating FROM lavka.orders "
+        "WHERE completed_courier_id = $1 AND rating IS NOT NULL "
+        "ORDER BY completed_time DESC LIMIT $2",
+        courier_id, limit);
+    auto postgres_orders = result_set.AsContainer<std::vector<Order::Rating>>();
+    std::vector<domain::Order::Rating> result;
+    result.resize(postgres_orders.size());
+    std::transform(postgres_orders.cbegin(), postgres_orders.cend(),
+                   result.begin(),
+                   [](auto rating) { return domain::Order::Rating(rating); });
+    return result;
+}
 }  // namespace lavka::postgres
