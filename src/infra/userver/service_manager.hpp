@@ -1,5 +1,6 @@
 #include <userver/components/component_base.hpp>
 #include <userver/utils/periodic_task.hpp>
+#include <userver/yaml_config/schema.hpp>
 
 #include "domain/services/courier_service.hpp"
 
@@ -10,8 +11,11 @@ class ServiceManager : public userver::components::ComponentBase {
 
    public:
     static constexpr std::string_view kName = "service-manager";
+
     ServiceManager(const userver::components::ComponentConfig& config,
                    const userver::components::ComponentContext& context);
+
+    static userver::yaml_config::Schema GetStaticConfigSchema();
 
     ~ServiceManager();
 
@@ -22,4 +26,8 @@ class ServiceManager : public userver::components::ComponentBase {
 template <>
 inline constexpr auto
     userver::components::kConfigFileMode<lavka::ServiceManager> =
-        ConfigFileMode::kNotRequired;
+        ConfigFileMode::kRequired;
+
+template <>
+inline constexpr bool userver::components::kHasValidate<lavka::ServiceManager> =
+    true;

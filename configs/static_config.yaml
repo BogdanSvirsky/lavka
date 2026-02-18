@@ -72,3 +72,7 @@ components_manager:
             path: /couriers/{courier_id}
             method: GET
             max_requests_per_second: 10
+        
+        service-manager:
+            number-of-ratings: $number-of-ratings
+            part-size: $part-size
