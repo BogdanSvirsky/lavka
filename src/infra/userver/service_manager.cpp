@@ -19,11 +19,7 @@ ServiceManager::ServiceManager(
       update_ratings_task(
           "update-ratings",
           userver::utils::PeriodicTask::Settings{std::chrono::days{1}},
-          [this]() {
-              LOG_DEBUG() << "TASK STARTED!";
-              this->courier_service->UpdateRatings();
-              LOG_DEBUG() << "TASK ENDED!";
-          }) {
+          [this]() { this->courier_service->UpdateRatings(); }) {
     update_ratings_task.RegisterInTestsuite(
         context.FindComponent<userver::components::TestsuiteSupport>()
             .GetPeriodicTaskControl());

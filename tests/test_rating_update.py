@@ -1,9 +1,10 @@
 import pytest
 import pytest_userver
+import testsuite
 
 
 @pytest.mark.pgsql("lavka", files=["init.sql"])
-async def simple_test(service_client, pgsql):
+async def simple_test(service_client: pytest_userver.client.Client, pgsql):
     cursor = pgsql["lavka"].cursor()
 
     await service_client.run_periodic_task("update-ratings")
@@ -24,6 +25,7 @@ async def simple_test(service_client, pgsql):
 
     cursor.execute("SELECT id FROM lavka.couriers WHERE id = {} AND rating = '5'".format(courier_id))
     assert len(cursor.fetchall()) == 1
+
 
 @pytest.mark.pgsql("lavka", files=["init2.sql"])
 async def test_rating_calculation(service_client, pgsql):
