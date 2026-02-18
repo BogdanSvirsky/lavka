@@ -36,10 +36,14 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
         try {
             order = order_repository->GetById(complete_info.order_id);
         } catch (std::invalid_argument& e) {
+            LOG_DEBUG() << "Can't find order with id="
+                        << complete_info.order_id;
             throw handlers::ClientError{};
         }
         order.completed_courier_id = complete_info.courier_id;
         order.completed_time = complete_info.complete_time;
+        if (complete_info.rating)
+            order.rating = domain::Order::Rating(complete_info.rating.value());
 
         orders_to_update.push_back(order);
     }
@@ -48,6 +52,7 @@ json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
     try {
         updated_orders = order_repository->UpdateAll(orders_to_update);
     } catch (std::invalid_argument& e) {
+        LOG_DEBUG() << "Can't update orders!";
         throw handlers::ClientError{};
     }
 

@@ -4,6 +4,7 @@
 #include <userver/utils/trivial_map.hpp>
 #include <utility>
 
+#include "domain/entities/courier.hpp"
 #include "domain/entities/order.hpp"
 #include "schemas/openapi.hpp"
 
@@ -14,4 +15,6 @@ std::pair<int, int> ExtractPagination(
     const userver::server::http::HttpRequest& request);
 
 OrderDto ToDto(const domain::Order& order);
+
+CourierDto ToDto(const domain::Courier& courier);
 }  // namespace lavka::api::utils

@@ -7,12 +7,15 @@
 
 namespace lavka::domain {
 struct Order {
+    enum Rating { k1 = 1, k2 = 2, k3 = 3, k4 = 4, k5 = 5 };
+
     std::int64_t id{};
-    float weight{};
+    double weight{};
     std::int32_t regions{};
     std::vector<std::string> delivery_hours{};
     std::int32_t cost{};
     std::optional<std::int64_t> completed_courier_id{};
     std::optional<userver::utils::datetime::TimePointTz> completed_time{};
+    std::optional<Rating> rating{};
 };
 }  // namespace lavka::domain

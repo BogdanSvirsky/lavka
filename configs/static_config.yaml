@@ -23,7 +23,25 @@ components_manager:
                     level: $logger-level
                     overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
 
-        testsuite-support: {}
+        http-client-middleware-pipeline:
+          load-enabled: $is-testing
+        http-client:
+          load-enabled: $is-testing
+        http-client-core:
+          load-enabled: $is-testing
+
+        tests-control:
+            load-enabled: $is-testing
+            path: /tests/{action}
+            method: POST
+            task_processor: main-task-processor
+            testpoint-timeout: 1s
+            skip-unregistered-testpoints: true
+
+        testsuite-support:
+          testsuite-pg-execute-timeout: 1s
+          testsuite-pg-statement-timeout: 1s
+          testsuite-pg-statement-timeout: 1s
 
         lavka-db:
             dbconnection: 'user=lavkauser password=lavkapass host=host.docker.internal port=5432 dbname=lavka'
@@ -54,3 +72,7 @@ components_manager:
             path: /couriers/{courier_id}
             method: GET
             max_requests_per_second: 10
+        
+        service-manager:
+            number-of-ratings: $number-of-ratings
+            part-size: $part-size

@@ -37,9 +37,9 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 
 # Unit Tests
-# add_executable(${PROJECT_NAME}_unittest)
-# target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
-# add_google_tests(${PROJECT_NAME}_unittest)
+add_executable(${PROJECT_NAME}_unittest unittests/couriers_service_test.cpp)
+target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
+add_google_tests(${PROJECT_NAME}_unittest)
 
 # Benchmarks
 # add_executable(${PROJECT_NAME}_benchmark)

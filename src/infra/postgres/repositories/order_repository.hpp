@@ -22,5 +22,10 @@ class OrderRepository final : public domain::IOrderRepository {
     // Throws an std::invalid_argument when can't update one of the orders
     std::vector<domain::Order> UpdateAll(
         std::vector<domain::Order> orders_to_update) override;
+
+    // Get ratings of the last orders that were complited by courier with id
+    // `courier_id` sorted in new to old order
+    std::vector<domain::Order::Rating> GetLastRatings(std::int64_t courier_id,
+                                                      int limit) override;
 };
 }  // namespace lavka::postgres
