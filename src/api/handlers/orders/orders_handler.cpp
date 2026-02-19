@@ -1,26 +1,15 @@
 #include "orders_handler.hpp"
 
-#include <userver/components/component_context.hpp>
 #include <userver/formats/json.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
-#include <userver/server/http/http_response.hpp>
-#include <userver/storages/postgres/component.hpp>
 
 #include "api/utils.hpp"
-#include "infra/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::server;
 using namespace userver::formats;
 
 namespace lavka::api {
-OrdersHandler::OrdersHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerJsonBase(config, context),
-      order_repository(
-          context.FindComponent<RepositoryManager>().GetOrderRepository()) {}
-
 json::Value OrdersHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value& request_json,
     userver::server::request::RequestContext&) const {

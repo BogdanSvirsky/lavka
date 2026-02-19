@@ -7,7 +7,7 @@
 #include <userver/testsuite/testsuite_support.hpp>
 #include <userver/yaml_config/merge_schemas.hpp>
 
-#include "infra/repository_manager.hpp"
+#include "infra/userver/repository_manager.hpp"
 
 namespace lavka {
 ServiceManager::ServiceManager(

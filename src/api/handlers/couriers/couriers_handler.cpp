@@ -1,23 +1,14 @@
 #include "couriers_handler.hpp"
 
-#include <userver/components/component.hpp>
 #include <userver/server/handlers/exceptions.hpp>
 
 #include "api/utils.hpp"
-#include "infra/repository_manager.hpp"
 #include "schemas/openapi.hpp"
 
 using namespace userver::server;
 using namespace userver::formats;
 
 namespace lavka::api {
-CouriersHandler::CouriersHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerJsonBase(config, context),
-      couriers_repository_ptr(context.FindComponent<lavka::RepositoryManager>()
-                                  .GetCourierRepository()) {}
-
 json::Value CouriersHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value& request_json,
     userver::server::request::RequestContext&) const {
@@ -37,7 +28,7 @@ json::Value CouriersHandler::GetCouriers(
 
     LOG_DEBUG() << limit << " " << offset;
 
-    auto couriers = couriers_repository_ptr->GetAll(limit, offset);
+    auto couriers = courier_repository->GetAll(limit, offset);
 
     GetCouriersResponse response_dto{.limit = limit, .offset = offset};
     for (auto courier : couriers) {
@@ -70,8 +61,7 @@ json::Value CouriersHandler::PostCouriers(
 
     std::vector<domain::Courier> created_couriers;
     try {
-        created_couriers =
-            couriers_repository_ptr->CreateAll(couriers_to_create);
+        created_couriers = courier_repository->CreateAll(couriers_to_create);
     } catch (std::invalid_argument& e) {
         LOG_DEBUG() << e.what();
         throw handlers::ClientError{};

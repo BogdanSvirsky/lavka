@@ -1,23 +1,14 @@
 #include "completed_orders_handler.hpp"
 
 #include <schemas/openapi.hpp>
-#include <userver/components/component_context.hpp>
 #include <userver/formats/serialize/common_containers.hpp>
 
 #include "api/utils.hpp"
-#include "infra/repository_manager.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 
 namespace lavka::api {
-CompletedOrdersHandler::CompletedOrdersHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerJsonBase(config, context),
-      order_repository(
-          context.FindComponent<RepositoryManager>().GetOrderRepository()) {}
-
 json::Value CompletedOrdersHandler::HandleRequestJsonThrow(
     const http::HttpRequest&, const json::Value& request_json,
     request::RequestContext&) const {

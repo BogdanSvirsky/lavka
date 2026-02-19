@@ -1,19 +1,11 @@
-#include <userver/server/handlers/http_handler_json_base.hpp>
-#include <userver/storages/postgres/cluster.hpp>
-
-#include "domain/repositories/order_repository.hpp"
+#include "infra/userver/common_handler.hpp"
 
 namespace lavka::api {
-class CompletedOrdersHandler
-    : public userver::server::handlers::HttpHandlerJsonBase {
-    domain::IOrderRepositoryPtr order_repository;
-
+class CompletedOrdersHandler : public CommonHandler {
    public:
     static constexpr std::string_view kName = "completed-orders-handler";
 
-    CompletedOrdersHandler(
-        const userver::components::ComponentConfig& config,
-        const userver::components::ComponentContext& context);
+    using CommonHandler::CommonHandler;
 
     userver::formats::json::Value HandleRequestJsonThrow(
         const userver::server::http::HttpRequest& request,

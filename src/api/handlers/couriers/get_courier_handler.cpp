@@ -1,23 +1,13 @@
 #include "get_courier_handler.hpp"
 
-#include <userver/components/component_context.hpp>
 #include <userver/server/http/http_error.hpp>
 
 #include "api/utils.hpp"
-#include "infra/repository_manager.hpp"
 
 using namespace userver::formats;
 using namespace userver::server;
 
 namespace lavka::api {
-
-GetCourierHandler::GetCourierHandler(
-    const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& context)
-    : HttpHandlerJsonBase(config, context),
-      couriers_repository_ptr(
-          context.FindComponent<RepositoryManager>().GetCourierRepository()) {}
-
 json::Value GetCourierHandler::HandleRequestJsonThrow(
     const http::HttpRequest& request, const json::Value&,
     request::RequestContext&) const {
@@ -33,7 +23,7 @@ json::Value GetCourierHandler::HandleRequestJsonThrow(
 
         domain::Courier courier;
         try {
-            courier = couriers_repository_ptr->GetById(courier_id);
+            courier = courier_repository->GetById(courier_id);
         } catch (std::invalid_argument& e) {
             throw handlers::ClientError{};
         }
