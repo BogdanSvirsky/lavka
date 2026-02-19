@@ -12,7 +12,7 @@ CourierRepository::CourierRepository(ClusterPtr pg_cluster_)
     : pg_cluster_(pg_cluster_) {};
 
 std::vector<domain::Courier> CourierRepository::CreateAll(
-    std::vector<domain::Courier> couriers_to_create) {
+    const std::vector<domain::Courier>& couriers_to_create) {
     std::vector<domain::Courier> created_couriers;
 
     Transaction tr =
@@ -56,7 +56,7 @@ std::vector<domain::Courier> CourierRepository::GetAll(int limit, int offset) {
     return couriers;
 }
 
-domain::Courier CourierRepository::GetById(std::int64_t id) {
+domain::Courier CourierRepository::GetById(domain::Courier::Id id) {
     auto res =
         pg_cluster_->Execute(ClusterHostType::kSlave,
                              "SELECT * FROM lavka.couriers WHERE id = $1;", id);

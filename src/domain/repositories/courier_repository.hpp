@@ -11,10 +11,10 @@ class ICourierRepository {
 
     // Throws an std::invalid_argument when can't create at least one argument
     virtual std::vector<Courier> CreateAll(
-        std::vector<Courier> couriers_to_create) = 0;
+        const std::vector<Courier>& couriers_to_create) = 0;
 
     // Throws an std::invalid_argument when can't find courier
-    virtual Courier GetById(std::int64_t id) = 0;
+    virtual Courier GetById(Courier::Id) = 0;
 
     // Throws an std::invalid_argument
     virtual void UpdateRatings(

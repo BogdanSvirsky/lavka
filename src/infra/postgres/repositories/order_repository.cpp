@@ -36,7 +36,7 @@ std::vector<domain::Order> OrderRepository::GetAll(int limit, int offset) {
 }
 
 std::vector<domain::Order> OrderRepository::CreateAll(
-    std::vector<domain::Order> orders_to_create) {
+    const std::vector<domain::Order>& orders_to_create) {
     std::vector<domain::Order> created_orders;
     Transaction tr =
         pg_cluster_->Begin("orders_creation_transaction",
@@ -66,7 +66,7 @@ std::vector<domain::Order> OrderRepository::CreateAll(
 }
 
 std::vector<domain::Order> OrderRepository::UpdateAll(
-    std::vector<domain::Order> orders_to_update) {
+    const std::vector<domain::Order>& orders_to_update) {
     std::vector<domain::Order> updated_orders;
 
     Transaction tr =
@@ -99,7 +99,7 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
 }
 
 std::vector<domain::Order::Rating> OrderRepository::GetLastRatings(
-    std::int64_t courier_id, int limit) {
+    domain::Courier::Id courier_id, int limit) {
     auto result_set = pg_cluster_->Execute(
         ClusterHostType::kSlave,
         "SELECT rating FROM lavka.orders "
