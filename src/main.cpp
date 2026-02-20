@@ -13,7 +13,7 @@
 #include "api/handlers/orders/completed_orders_handler.hpp"
 #include "api/handlers/orders/get_order_handler.hpp"
 #include "api/handlers/orders/orders_handler.hpp"
-#include "infra/repository_manager.hpp"
+#include "infra/userver/repository_manager.hpp"
 #include "infra/userver/service_manager.hpp"
 
 int main(int argc, char* argv[]) {

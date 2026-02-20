@@ -11,21 +11,21 @@ class OrderRepository final : public domain::IOrderRepository {
     OrderRepository(userver::storages::postgres::ClusterPtr pg_cluster);
 
     // Throws an std::invalid_argument when id is invalid
-    domain::Order GetById(std::int64_t id) override;
+    domain::Order GetById(domain::Order::Id id) override;
 
     std::vector<domain::Order> GetAll(int limit, int offset) override;
 
     // Throws an std::invalid_argument when can't create one of the orders
     std::vector<domain::Order> CreateAll(
-        std::vector<domain::Order> orders_to_create) override;
+        const std::vector<domain::Order>& orders_to_create) override;
 
     // Throws an std::invalid_argument when can't update one of the orders
     std::vector<domain::Order> UpdateAll(
-        std::vector<domain::Order> orders_to_update) override;
+        const std::vector<domain::Order>& orders_to_update) override;
 
     // Get ratings of the last orders that were complited by courier with id
     // `courier_id` sorted in new to old order
-    std::vector<domain::Order::Rating> GetLastRatings(std::int64_t courier_id,
-                                                      int limit) override;
+    std::vector<domain::Order::Rating> GetLastRatings(
+        domain::Courier::Id courier_id, int limit) override;
 };
 }  // namespace lavka::postgres

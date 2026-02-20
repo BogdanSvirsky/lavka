@@ -8,6 +8,22 @@ from dateutil import parser
 def compare_datetime(a: datetime, b: datetime):
     return a.astimezone(tz=timezone.utc) == b.astimezone(tz=timezone.utc)
 
+def validate_orders(order_json, order_row):
+    # may not be equivalent due to inaccuracy
+    assert order_row[1] == order_json['weight']
+    assert order_row[2] == order_json['regions']
+    assert order_row[3] == order_json['delivery_hours']
+    assert order_row[4] == order_json['cost']
+    if order_row[7] is not None:
+        assert order_row[5] is not None
+        assert compare_datetime(parser.isoparse(
+            order_json["completed_time"]), order_row[7])
+        if order_row[6] is not None:
+            assert order_row[6] == str(order_json["rating"])
+        else:
+            assert "rating" not in order_json.keys()
+    else:
+        assert order_row[5] is None and "completed_time" not in order_json.keys()
 
 @pytest.mark.pgsql("lavka", files=["init.sql"])
 async def test_get(service_client, pgsql):
@@ -17,21 +33,7 @@ async def test_get(service_client, pgsql):
                 "SELECT * FROM lavka.orders WHERE id = {};".format(str(order_json["order_id"])))
             res = cursor.fetchone()
 
-            # may not be equivalent due to inaccuracy
-            assert res[1] == order_json['weight']
-            assert res[2] == order_json['regions']
-            assert res[3] == order_json['delivery_hours']
-            assert res[4] == order_json['cost']
-            if res[7] is not None:
-                assert res[5] is not None
-                assert compare_datetime(parser.isoparse(
-                    order_json["completed_time"]), res[7])
-                if res[6] is not None:
-                    assert res[6] == str(order_json["rating"])
-                else:
-                    assert "rating" not in order_json.keys()
-            else:
-                assert res[5] is None and "completed_time" not in order_json.keys()
+            validate_orders(order_json, res)
 
     # all presented
     response = await service_client.get('/orders?limit=10')

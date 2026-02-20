@@ -1,13 +1,7 @@
-#include <userver/server/handlers/http_handler_base.hpp>
-#include <userver/server/handlers/http_handler_json_base.hpp>
-#include <userver/storages/postgres/cluster.hpp>
-
-#include "domain/repositories/courier_repository.hpp"
+#include "infra/userver/common_handler.hpp"
 
 namespace lavka::api {
-class CouriersHandler : public userver::server::handlers::HttpHandlerJsonBase {
-    domain::ICourierRepositoryPtr couriers_repository_ptr;
-
+class CouriersHandler : public CommonHandler {
     userver::formats::json::Value GetCouriers(
         const userver::server::http::HttpRequest& request) const;
     userver::formats::json::Value PostCouriers(
@@ -16,8 +10,7 @@ class CouriersHandler : public userver::server::handlers::HttpHandlerJsonBase {
    public:
     static constexpr std::string_view kName = "couriers-handler";
 
-    CouriersHandler(const userver::components::ComponentConfig& config,
-                    const userver::components::ComponentContext& context);
+    using CommonHandler::CommonHandler;
 
     userver::formats::json::Value HandleRequestJsonThrow(
         const userver::server::http::HttpRequest& request,

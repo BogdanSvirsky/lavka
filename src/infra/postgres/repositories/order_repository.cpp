@@ -23,20 +23,23 @@ std::vector<domain::Order> OrderRepository::GetAll(int limit, int offset) {
     if (limit < 1 || offset < 0)
         throw std::invalid_argument{"Bad limit or offset!"};
 
-    auto result_set = pg_cluster_->Execute(ClusterHostType::kSlave,
-                                           "SELECT * FROM lavka.orders "
-                                           "ORDER BY id LIMIT $1 OFFSET $2;",
-                                           limit, offset);
-    auto orders_result_set = result_set.AsSetOf<Order>(kRowTag);
+    auto postgres_result = pg_cluster_
+                               ->Execute(ClusterHostType::kSlave,
+                                         "SELECT * FROM lavka.orders "
+                                         "ORDER BY id LIMIT $1 OFFSET $2;",
+                                         limit, offset)
+                               .AsContainer<std::vector<Order>>(kRowTag);
 
-    std::vector<domain::Order> result_vector;
-    for (Order order : orders_result_set)
-        result_vector.push_back(utils::ToDomain(order));
-    return result_vector;
+    std::vector<domain::Order> domain_result{postgres_result.size()};
+    std::transform(
+        postgres_result.cbegin(), postgres_result.cend(), domain_result.begin(),
+        static_cast<domain::Order (*)(const Order&)>(utils::ToDomain));
+
+    return domain_result;
 }
 
 std::vector<domain::Order> OrderRepository::CreateAll(
-    std::vector<domain::Order> orders_to_create) {
+    const std::vector<domain::Order>& orders_to_create) {
     std::vector<domain::Order> created_orders;
     Transaction tr =
         pg_cluster_->Begin("orders_creation_transaction",
@@ -66,7 +69,7 @@ std::vector<domain::Order> OrderRepository::CreateAll(
 }
 
 std::vector<domain::Order> OrderRepository::UpdateAll(
-    std::vector<domain::Order> orders_to_update) {
+    const std::vector<domain::Order>& orders_to_update) {
     std::vector<domain::Order> updated_orders;
 
     Transaction tr =
@@ -99,7 +102,7 @@ std::vector<domain::Order> OrderRepository::UpdateAll(
 }
 
 std::vector<domain::Order::Rating> OrderRepository::GetLastRatings(
-    std::int64_t courier_id, int limit) {
+    domain::Courier::Id courier_id, int limit) {
     auto result_set = pg_cluster_->Execute(
         ClusterHostType::kSlave,
         "SELECT rating FROM lavka.orders "

@@ -12,7 +12,7 @@ CourierRepository::CourierRepository(ClusterPtr pg_cluster_)
     : pg_cluster_(pg_cluster_) {};
 
 std::vector<domain::Courier> CourierRepository::CreateAll(
-    std::vector<domain::Courier> couriers_to_create) {
+    const std::vector<domain::Courier>& couriers_to_create) {
     std::vector<domain::Courier> created_couriers;
 
     Transaction tr =
@@ -44,19 +44,23 @@ std::vector<domain::Courier> CourierRepository::GetAll(int limit, int offset) {
     if (limit < 1 || offset < 0)
         throw std::invalid_argument{"Bad limit or offset!"};
 
-    auto result_set = pg_cluster_->Execute(
-        ClusterHostType::kSlave,
-        "SELECT * FROM lavka.couriers ORDER BY id LIMIT $1 OFFSET $2;", limit,
-        offset);
+    auto postgres_result =
+        pg_cluster_
+            ->Execute(
+                ClusterHostType::kSlave,
+                "SELECT * FROM lavka.couriers ORDER BY id LIMIT $1 OFFSET $2;",
+                limit, offset)
+            .AsContainer<std::vector<Courier>>(kRowTag);
 
-    std::vector<domain::Courier> couriers;
-    for (Courier courier : result_set.AsSetOf<Courier>(kRowTag))
-        couriers.push_back(utils::ToDomain(courier));
+    std::vector<domain::Courier> domain_result{postgres_result.size()};
+    std::transform(
+        postgres_result.cbegin(), postgres_result.cend(), domain_result.begin(),
+        static_cast<domain::Courier (*)(const Courier&)>(utils::ToDomain));
 
-    return couriers;
+    return domain_result;
 }
 
-domain::Courier CourierRepository::GetById(std::int64_t id) {
+domain::Courier CourierRepository::GetById(domain::Courier::Id id) {
     auto res =
         pg_cluster_->Execute(ClusterHostType::kSlave,
                              "SELECT * FROM lavka.couriers WHERE id = $1;", id);
