@@ -1,5 +1,7 @@
 # lavka
 
+**NOTE:** Courier rating calculation based on [this article](https://pro.yandex.ru/ru-ru/moskva/knowledge-base/delivery-foot/execution/delivery-rating)
+
 Template of a C++ service that uses [userver framework](https://github.com/userver-framework/userver).
 
 
